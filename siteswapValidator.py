@@ -1,5 +1,6 @@
 from siteswap import Siteswap
 from throwNode import ThrowNode
+
 class SiteswapValidator(object):
     def __init__(self):
         self.pattern = Siteswap()
@@ -200,10 +201,8 @@ class SiteswapValidator(object):
 
         if self.isValid():
             self.pattern.setValidity(True)
-            self.pattern.symmetric = True
         else:
             self.pattern.setValidity(False)
-            self.pattern.symmetric = False
             if Siteswap.showInvalidFirstPass: self.pattern.printSiteswap()
             self.pattern.makeAsymmetric()
             self.fillRethrowLine()

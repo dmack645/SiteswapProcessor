@@ -24,19 +24,8 @@ from siteswapValidator import SiteswapValidator
 from stateGenerator import StateGenerator
 import os
 import webbrowser
-# IF TXT FILES, LIST AND PROMPT OPTIONAL SELECTION
-#    IF FILE SELECTED, RUN EACH STRING UP TO EVERY NEWLINE
-#    THROUGH THE PARSER. ALL MUST BE VALID SITESWAPS.
-#    IF TXT VALIDATED, LIST AND PROMPT OPTIONAL SELECTION.
-#    ALLOW A CANCEL FEATURE. SELECTED SITESWAP LOADED AND DISPLAYED.
-# IF NO TXT FILES, CALL FOR USER INPUT VALIDATION
-# INPUT A CHARACTER TO ADD PREVIOUS SITESWAP TO A TEXT FILE
-# SHOW SELECTION OF TEXT FILES OR CREAT NEW FILE
 """
-NOTES
-ADD SHIFT LEFT AND SHIFT RIGHT FEATURES.
-ADD GETSTATE FEATURE
-WAY TO CONNECT TO JUGGLING LAB?
+NOTES:
 ADD DELETE/INSERT/MOVE FEATURE FOR TXT FILES
 CONVERT FROM MHN STRUCTURE TO STRING IN JLAB NOTATION 
 
@@ -79,10 +68,12 @@ class SiteswapTool(object):
                 self.stateMachine.generateStates(self.siteswap)
 
             elif self.userString == 'jlab':
-                url = "https://jugglinglab.org/anim?" + self.siteswap.getJlabString()
-                #url += ";redirect=true"
+                jLab = self.siteswap.getJlabString()
+                url = "https://jugglinglab.org/anim?pattern=" + jLab
+                #url += ";gravity=2500.0;bps=6.5"
                 webbrowser.open_new_tab(url)
                 print("Attempting to load Juggling Lab gif in default browser.")
+                print(jLab)
             
             else:
                 self.rawSiteswap = self.userString
@@ -91,19 +82,6 @@ class SiteswapTool(object):
                     self.siteswap.makeSymmetric()
                 self.validator.validate(self.siteswap)
                 self.siteswap.printSiteswap()
-            
-    def parseString(self, string):
-        tempSiteswap = Siteswap()
-        parser = Parser()               # Create Parser object
-
-        try:
-            tempSiteswap = parser.parse(string)
-            #siteswap.printSiteswap()
-        except Exception as e:
-            print("Error:")
-            print(e)
-            tempSiteswap.delete()
-        return tempSiteswap
 
     def chooseSiteswap(self):
         textDict = self.getTextFilesDict()
@@ -136,7 +114,20 @@ class SiteswapTool(object):
                     else: 
                         print("Invalid input. Try again: ", end = '')
 
-            else: print("Invalid input. Try again: ", end = '')
+            else: print("Invalid input. Try again: ", end = '')     
+
+    def parseString(self, string):
+        tempSiteswap = Siteswap()
+        parser = Parser()               # Create Parser object
+
+        try:
+            tempSiteswap = parser.parse(string)
+            #siteswap.printSiteswap()
+        except Exception as e:
+            print("Error:")
+            print(e)
+            tempSiteswap.delete()
+        return tempSiteswap
 
     def saveSiteswap(self):
         textDict = self.getTextFilesDict()
@@ -191,6 +182,7 @@ class SiteswapTool(object):
             return
         elif direction == 'sl':
             self.siteswap = self.siteswap.next
+            self.validator.validate(self.siteswap)
         else:
             self.siteswap = self.siteswap.getTerm(len(self.siteswap) - 1)
             self.validator.validate(self.siteswap)

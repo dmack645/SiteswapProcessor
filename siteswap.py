@@ -175,20 +175,20 @@ class Siteswap(object):
         # leadingProbe points to end, laggingProbe follows from beginning
         while i < length:
             term = Siteswap(ThrowNode(), ThrowNode(), next = self) # don't think I need to point next to pattern
- 
+            term.symmetric = True
             # Add throws from laggingProbe to leadingProbe (swap handedness)
             for node in probe.left:
                 right = ThrowNode(node.throw, node.throwX, None)
                 term.right.addThrow(right)
 
             for node in probe.right:
-
                 left = ThrowNode(node.throw, node.throwX, None)
                 term.left.addThrow(left)
             self.addTerm(term)
-            
+            probe.symmetric = True
             probe = probe.next
             i += 1
+
 
     def makeAsymmetric(self):
         """
@@ -203,10 +203,12 @@ class Siteswap(object):
 
             # Find last term in first half of structure
             for term in range (0, i):
+                probe.symmetric = False
                 probe = probe.next
 
             # Link this probe to self, removing second half from structure
             probe.next = self
+
 
     def getNumberProps(self):
         """Returns the number of props being juggled"""
@@ -257,6 +259,35 @@ class Siteswap(object):
         else:
             return False
 
+    def getVanillaFirstHand(self):
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe.left.isNull() and not probe.right.isNull():
+                return 'r'
+            elif probe.right.isNull() and not probe.left.isNull():
+                return 'l'
+            probe = probe.next 
+            index += 1
+        return 'r'
+
+    def getVanillaFirstIndex(self):
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe.left.isNull() and probe.right.isNull():
+                probe = probe.next 
+                index += 1
+            else:
+                return index
+
+
+        return 0
+
     def isVanilla(self):
         """Returns True if async vanilla siteswap"""
         # Check for empty siteswap
@@ -267,7 +298,24 @@ class Siteswap(object):
         index = 0
         length = len(self)
         probe = self
+        while index < length:
+            if probe.left.isNull() and not probe.right.isNull():
+                if hand == 'r':
+                    return False
+                else:
+                    hand = 'r'
+            elif probe.right.isNull() and not probe.left.isNull():
+                if hand == 'l':
+                    return False
+                else:
+                    hand = 'l'
+            elif len(probe.left) >= 1 and len(probe.right) >= 1:
+                return False
+            probe = probe.next 
+            index += 1
 
+        return True
+    '''
         while index < length:
             if len(probe.left) == 0 and len(probe.right) >=1:
                 if hand == 'r':
@@ -285,7 +333,7 @@ class Siteswap(object):
             index += 1
 
         return True
-
+    '''
     def isEmpty(self):
         """
         Returns True if no throws made this term and there's no next term.
@@ -379,22 +427,58 @@ class Siteswap(object):
 
     def getJlabString(self):
         """Returns a string representation of the structure in JLAB format"""
-
         string = ""
-        i = 0
+        index = 0
         probe = self
 
-        for node in self:
-            if str(node.left) == '-':
-                left = '0'
+        if not self.isVanilla():
+            for node in self:   # REVISE THIS TO USE PROBE~~~~~~~~~~~~
+                if str(node.left) == '-':
+                    left = '0'
+                else:
+                    left = str(node.left)
+                if str(node.right) == '-':
+                    right = '0'
+                else:
+                    right = str(node.right)
+                string += ("(%s,%s)!" % (left, right))
+            return string
+
+        else:   # Vanilla
+            hand = self.getVanillaFirstHand()
+            firstIndex = self.getVanillaFirstIndex()
+
+            # Point to first index that isn't zero
+            while firstIndex != 0:
+                probe = probe.next
+                firstIndex -= 1
+
+            if self.symmetric:
+                patternLength = len(self) // 2
             else:
-                left = str(node.left)
-            if str(node.right) == '-':
-                right = '0'
-            else:
-                right = str(node.right)
-            string += ("(%s,%s)!" % (left, right))
-        return string
+                patternLength = len(self)
+
+            while index < patternLength:
+                if hand == 'r':
+                    if str(probe.right) == '-':
+                        value = '0'
+                    else:
+                        value = str(probe.right)
+                    string += value
+                    hand = 'l'
+                else:
+                    if str(probe.left) == '-':
+                        value = '0'
+                    else:
+                        value = str(probe.left)
+                    string += value
+                    hand = 'r'
+                index += 1
+                probe = probe.next
+            return string
+
+
+
 
     def __iter__(self): 
         """"Returns iterable object. Allows for 'for' loops and iter()"""

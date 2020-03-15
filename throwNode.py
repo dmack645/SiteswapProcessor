@@ -92,6 +92,12 @@ class ThrowNode(object):
         else:
             return False  
 
+    def isNull(self):
+        if self.throw == None or self.throw == 0:
+            return True
+        else: 
+            return False
+
     def isEmpty(self):
         """Returns True if length of the structure is zero"""
 
