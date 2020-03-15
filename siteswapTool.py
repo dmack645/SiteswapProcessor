@@ -23,6 +23,7 @@ from siteswap import Siteswap
 from siteswapValidator import SiteswapValidator
 from stateGenerator import StateGenerator
 import os
+import webbrowser
 # IF TXT FILES, LIST AND PROMPT OPTIONAL SELECTION
 #    IF FILE SELECTED, RUN EACH STRING UP TO EVERY NEWLINE
 #    THROUGH THE PARSER. ALL MUST BE VALID SITESWAPS.
@@ -77,6 +78,11 @@ class SiteswapTool(object):
                 self.stateMachine = StateGenerator()
                 self.stateMachine.generateStates(self.siteswap)
 
+            elif self.userString == 'jlab':
+                url = "https://jugglinglab.org/anim?" + self.siteswap.getJlabString()
+                #url += ";redirect=true"
+                webbrowser.open_new_tab(url)
+                print("Attempting to load Juggling Lab gif in default browser.")
             
             else:
                 self.rawSiteswap = self.userString

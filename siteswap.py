@@ -377,6 +377,25 @@ class Siteswap(object):
             string += ("(%s,%s)" % (str(node.left), str(node.right)))
         return string
 
+    def getJlabString(self):
+        """Returns a string representation of the structure in JLAB format"""
+
+        string = ""
+        i = 0
+        probe = self
+
+        for node in self:
+            if str(node.left) == '-':
+                left = '0'
+            else:
+                left = str(node.left)
+            if str(node.right) == '-':
+                right = '0'
+            else:
+                right = str(node.right)
+            string += ("(%s,%s)!" % (left, right))
+        return string
+
     def __iter__(self): 
         """"Returns iterable object. Allows for 'for' loops and iter()"""
         self.probe = self
