@@ -52,15 +52,15 @@ class SiteswapTool(object):
     def run(self):
         textDict = self.getTextFilesDict()
         if len(textDict) == 0:
-            self.parseUserInput()
+            self.getUserInput()
 
         else:
             print(self.header)
             print("Text files found:")
             self.chooseSiteswap()
-            self.parseUserInput()
+            self.getUserInput()
 
-    def parseUserInput(self):
+    def getUserInput(self):
         while True:
             print(self.header)
             self.userString = input("Enter siteswap or option: ")
