@@ -1,0 +1,412 @@
+"""
+***************************************************************************
+Filename:      termNode.py
+
+Author:        David Mackie
+
+Date:          2019.11.04
+
+Modifications: 2019.11.04
+
+Description:   This module defines a class termNode. This represents the available
+               sites at a given beat in time in a siteswap pattern, and is the 
+               basic building block of siteswap notation. 
+               Objects of this class are intended to be built into circular singly 
+               linked structures (implements the circular rule of siteswap for free).
+               This class contains the bulk of methods that can be applied to a pattern.
+***************************************************************************
+"""
+# Might be good to create a validator class or function
+'''
+getState fills in "state" class variable for each term in the pattern
+'''
+from throwNode import ThrowNode
+
+class Siteswap(object):
+    """
+    Represents a siteswap (or MHN) term. 
+
+    Forms circular singly linked structure.
+    """
+    showInvalidFirstPass = False
+    showIndexLine = True
+
+    def __init__(self, left = ThrowNode(), right = ThrowNode(), next = None):
+        """
+        Instantiates a Node with a default next of None.
+        """
+
+        self.left = left
+        self.right = right
+        self.next = next
+
+        self.valid = True
+        self.errorString = ""
+        self.symmetric = False
+
+        self.rethrowsNotShown = False
+        self.rethrowsNotShownStr = ""
+
+        self.index = None
+
+    def addTerm(self, term):
+        """
+        Add a term to the end of the structure.
+        This is the same as inserting a throwNode one link behind self
+        """
+
+        if self.isEmpty():
+            self.left = term.left
+            self.right = term.right
+            self.next = self
+            return
+
+        term.next = self
+        probe = self
+        # Search for node at the last position
+        while probe.next != self:
+            probe = probe.next
+        # Insert new node after last position
+        probe.next = term
+
+    def getTerm(self, index = 0):
+        """Returns the term at the given index relative to self"""
+
+        for term in self:
+            if index == 0 or term.next is self:
+                return term
+            index -= 1
+
+    def getIndex(self, term):
+        """Returns the index of the term relative to self (self has index = 0"""
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe is term:
+                return probe.index
+            probe = probe.next
+        return -1
+
+    def setIndices(self):
+        """Sets Siteswap self.index and ThrowNode self.index fields for the sitewap relative to self"""
+        index = 0
+        length = len(self)
+        probe = self
+
+        # Check for empty siteswap
+        if probe.isEmpty():
+            probe.index = 0
+            return
+
+
+        while index < length:
+            probe.index = index   # Set Siteswap index
+
+            # Set probe.left index
+            throw = probe.left
+            while throw != None:
+                throw.indexStr = str(index) + 'l'
+                throw = throw.next
+
+            # Set probe.right index
+            throw = probe.right
+            while throw != None:
+                throw.indexStr = str(index) + 'r'
+                throw = throw.next
+
+            probe = probe.next
+            index += 1 
+
+    def setValidity(self, validity):
+        index = 0
+        length = len(self)
+        probe = self
+
+        # Check for empty siteswap
+        if probe.isEmpty():
+            probe.valid = True 
+            return
+
+
+        while index < length:
+            probe.valid = validity   # Set validity
+            probe = probe.next 
+            index += 1
+
+    def isRethrowFull(self, hand):
+        if hand == 'l':
+            probe = self.left
+        else: 
+            probe = self.right
+
+        while probe != None:
+            if probe.rethrow == None:
+                return False
+            probe = probe.next
+        return True
+
+    def isInvalidFull(self, hand):
+        if hand == 'l':
+            probe = self.left
+        else: 
+            probe = self.right
+
+        while probe != None:
+            if probe.invalidRethrow == None:
+                return False
+            probe = probe.next
+        return True
+
+    def makeSymmetric(self):
+        """
+        Adds on a second half that mirrors the first half (hands switched)
+
+        Precondition: self must point to the header node of a structure
+        """
+        self.clearRethrowValues()
+        length = len(self)
+        i = 0
+
+        probe = self
+
+        # Search for node at the last position
+        # leadingProbe points to end, laggingProbe follows from beginning
+        while i < length:
+            term = Siteswap(ThrowNode(), ThrowNode(), next = self) # don't think I need to point next to pattern
+ 
+            # Add throws from laggingProbe to leadingProbe (swap handedness)
+            for node in probe.left:
+                right = ThrowNode(node.throw, node.throwX, None)
+                term.right.addThrow(right)
+
+            for node in probe.right:
+
+                left = ThrowNode(node.throw, node.throwX, None)
+                term.left.addThrow(left)
+            self.addTerm(term)
+            
+            probe = probe.next
+            i += 1
+
+    def makeAsymmetric(self):
+        """
+        Throws out second half of pattern.
+
+        Precondition: length of structure must be even
+        """
+        self.clearRethrowValues()
+        if len(self) % 2 == 0 and len(self) >= 2:
+            i = int((len(self) / 2) - 1)  # index of last term in first half
+            probe = self
+
+            # Find last term in first half of structure
+            for term in range (0, i):
+                probe = probe.next
+
+            # Link this probe to self, removing second half from structure
+            probe.next = self
+
+    def getNumberProps(self):
+        """Returns the number of props being juggled"""
+        if len(self) != 0:
+            # Get sum of all throw values in pattern
+            sumOfThrows = 0
+            for term in self:
+                for node in term.left:
+                    if node.throw != None:
+                        sumOfThrows += node.throw
+                for node in term.right:
+                    if node.throw != None:
+                        sumOfThrows += node.throw
+
+            # Divide by length to get average, which is number of props
+            numProps = sumOfThrows/len(self)
+            return numProps
+        else: return 0
+
+    def clearRethrowValues(self):
+        """
+        Traverses structure and sets self.rightCheck and self.leftCheck to None 
+        for all terms.
+        """
+
+        for node in self:
+            node.left.clearRethrowValues()
+            node.right.clearRethrowValues()
+            node.rethrowsNotShown = False
+            node.rethrowsNotShownStr = ""
+
+    def isLastSync(self):
+        """
+        Returns True if the last term relative to self is synchronous
+        """
+
+        if self.isEmpty():
+            return False
+        probe = self
+        # Search for node at the last position
+        while probe.next != self:
+            probe = probe.next
+
+        # Insert new node after node at position index - 1
+        # or last position
+        if not probe.left.isEmpty() and not probe.right.isEmpty():
+            return True
+        else:
+            return False
+
+    def isVanilla(self):
+        """Returns True if async vanilla siteswap"""
+        # Check for empty siteswap
+        if self.isEmpty(): return True
+
+        hand = None
+
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if len(probe.left) == 0 and len(probe.right) >=1:
+                if hand == 'r':
+                    return False
+                else:
+                    hand = 'r'
+            elif len(probe.left) >= 1 and len(probe.right) == 0:
+                if hand == 'l':
+                    return False
+                else:
+                    hand = 'l'
+            elif len(probe.left) >= 1 and len(probe.right) >= 1:
+                return False
+            probe = probe.next 
+            index += 1
+
+        return True
+
+    def isEmpty(self):
+        """
+        Returns True if no throws made this term and there's no next term.
+        Otherwise, return False
+        """
+
+        if self.left.isEmpty() and self.right.isEmpty() and self.next == None:
+            return True
+        else: return False
+
+    def delete(self):
+        """Deletes content of structure - only one empty node remains"""
+        self.next = None
+        self.left = ThrowNode()
+        self.right = ThrowNode()
+        
+    def getRethrowStr(self):
+        """Returns a string representation of the structure's rethrow values in MHN format"""
+        string = ""
+        i = 0
+        probe = self
+        for node in self:
+            string += ("(%s,%s)" % (node.left.rethrowStr(), node.right.rethrowStr()))
+        return string
+
+    def getInvalidRethrowStr(self):
+        """Returns a string representation of the structure's rethrow values in MHN format"""
+        string = ""
+        i = 0
+        probe = self
+        for node in self:
+            string += ("(%s,%s)" % (node.left.invalidRethrowStr(), node.right.invalidRethrowStr()))
+        return string
+
+    def getIndexStr(self):
+        string = ""
+        tempString = ""
+        width = 0
+        for node in self:
+            tempString = ("%s,%s" % (str(node.left), str(node.right)))
+            width = len(tempString)
+            string += "({:^{}})".format(str(node.index), width)
+        return string
+
+    def printSiteswap(self):
+            if self.valid and not self.isEmpty():
+                self.setIndices()
+                print("\nValid %d-prop siteswap" % self.getNumberProps())
+                print("Indices:       " + self.getIndexStr())
+                print("Siteswap:      " + str(self))
+                print("Rethrow line:  " + self.getRethrowStr())
+                print()
+
+            elif not self.isEmpty(): 
+                self.setIndices()
+                print("\nInvalid siteswap")
+                print("Indices:       " + self.getIndexStr())
+                print("Siteswap:      " + str(self))
+                print("Rethrow lines: " + self.getRethrowStr())
+                print("               " + self.getInvalidRethrowStr())
+                if self.rethrowsNotShown:
+                    print(self.rethrowsNotShownStr)
+                    print()
+                else:
+                    print()
+            else:
+                print("Siteswap empty")
+
+    def __len__(self):
+        """Returns the number of terms in the structure"""
+        probe = self
+        length = 0
+        if self.isEmpty():
+            return 0
+
+        while probe.next != self:
+            length += 1
+            probe = probe.next
+        return length + 1
+
+    def __str__(self):
+        """Returns a string representation of the structure in MHN format"""
+
+        string = ""
+        i = 0
+        probe = self
+
+        for node in self:
+            string += ("(%s,%s)" % (str(node.left), str(node.right)))
+        return string
+
+    def __iter__(self): 
+        """"Returns iterable object. Allows for 'for' loops and iter()"""
+        self.probe = self
+        self.i = 0
+        return self
+  
+    def __next__(self):  
+        """Behavior of next() on iter(self)"""
+        if self.i >= len(self):
+            raise StopIteration 
+        else: 
+            temp = self.probe
+            self.probe = self.probe.next
+            self.i += 1
+            return temp  
+
+     
+
+    '''
+    # TO BE USED LATER
+    def addX(self, left = False, right = False):
+        """
+        Adds 'x' modifiers to the last term
+        I'll use this later on when I add siteswap transforms
+        """
+        probe = self
+        # Search for node at the last position
+        while probe.next != self:
+            probe = probe.next
+
+        probe.leftX = left
+        probe.rightX = right
+    '''
