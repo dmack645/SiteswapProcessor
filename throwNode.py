@@ -119,11 +119,38 @@ class ThrowNode(object):
             probe = probe.next
         return length + 1
 
-    def __str__(self):
+    def getSimpleString(self):
         """Returns a string representation of the throw value. Supports multiplex notation"""
-
         string = ""
         i = 0
+
+        for node in self:
+            if node.throw == None:
+                throw = '-'
+            elif node.throw >= 10:
+                throw = chr(node.throw + 87)    # display as hex chr if >= 10
+            else: throw = str(node.throw)
+
+            if node.throwX:
+                throwX = 'x'
+            else:
+                throwX = ""
+
+            if len(self) > 1 and i == 0:
+                string += '['
+
+            string += throw + throwX
+            if (len(self) > 1 and i == len(self) - 1):
+                string += ']'
+            i += 1
+
+        return string
+
+    def __str__(self):
+        """Returns a string representation of the throw value. Supports multiplex notation"""
+        string = ""
+        i = 0
+
         for node in self:
             if node.throw == None:
                 throw = '-'

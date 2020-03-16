@@ -87,13 +87,13 @@ class StateNode(object):
     def __str__(self):
         string = ""
         if self.isEmpty():
-            return "(0, 0)"
+            return "(0,0)"
 
         self.fillInZeros()
         index = 0
         probe = self
         while index < len(self):
-            string += "(" + str(probe.left) + ", " + str(probe.right) +")"
+            string += "(" + str(probe.left) + "," + str(probe.right) +")"
             probe = probe.next
             index += 1
         return string

@@ -71,23 +71,28 @@ class SiteswapTool(object):
             
             elif self.userString == 'state':
                 self.stateMachine = StateGenerator()
-                self.stateMachine.generateStates(self.siteswap)
+                self.stateMachine.printStates(self.siteswap)
 
-            elif self.userString == 'jlab':
+            elif self.userString == 'a':
                 jLab = self.siteswap.getJlabString()
                 url = "https://jugglinglab.org/anim?pattern=" + jLab
                 #url += ";gravity=2500.0;bps=6.5"
                 webbrowser.open_new_tab(url)
                 print("Attempting to load Juggling Lab gif in default browser.")
                 print(jLab)
-            
+            elif self.userString == 'jlab':
+                print("Current pattern in Juggling Lab compatible siteswap notation: ")
+                print(self.siteswap.getJlabString())
             else:
-                self.rawSiteswap = self.userString
-                self.siteswap = self.parseString(self.userString)
-                if self.siteswap.isVanilla() and len(self.siteswap) % 2 != 0: 
-                    self.siteswap.makeSymmetric()
-                self.validator.validate(self.siteswap)
-                self.siteswap.printSiteswap()
+                tempSiteswap = self.parseString(self.userString)
+                self.validator.validate(tempSiteswap)
+
+                if tempSiteswap is self.siteswap:
+                    continue
+                else:
+                    self.siteswap = tempSiteswap
+                    self.rawSiteswap = self.userString
+                    self.siteswap.printSiteswap()
 
     def chooseSiteswap(self):
         textDict = self.getTextFilesDict()
@@ -114,9 +119,11 @@ class SiteswapTool(object):
                         return
                     elif siteswapIndex.isdigit() and (int(siteswapIndex) - 1) in range(len(siteswapDict)):
                         self.rawSiteswap = siteswapDict[int(siteswapIndex)]
-                        self.siteswap = self.parseString(siteswapDict[int(siteswapIndex)])
-                        self.validator.validate(self.siteswap) # add param "raw = True"
-                        self.siteswap.printSiteswap()
+                        tempSiteswap = self.parseString(siteswapDict[int(siteswapIndex)])
+                        self.validator.validate(tempSiteswap) # detect for vanilla in validator
+                        if tempSiteswap.valid:
+                            self.siteswap = tempSiteswap
+                            self.siteswap.printSiteswap()
                         file.close()
                         return
                     else: 
@@ -124,7 +131,7 @@ class SiteswapTool(object):
 
             else: print("Invalid input. Try again: ", end = '')     
 
-    def parseString(self, string):
+    def parseString(self, string, quiet = False):
         tempSiteswap = Siteswap()
         parser = Parser()               # Create Parser object
 
@@ -132,9 +139,11 @@ class SiteswapTool(object):
             tempSiteswap = parser.parse(string)
             #siteswap.printSiteswap()
         except Exception as e:
-            print("Error:")
-            print(e)
+            if quiet == False:
+                print("Error:")
+                print(e)
             tempSiteswap.delete()
+            return self.siteswap
         return tempSiteswap
 
     def saveSiteswap(self):
@@ -200,7 +209,7 @@ class SiteswapTool(object):
         siteswapList = list()
         for string in file:
             
-            tempSiteswap = self.parseString(string)
+            tempSiteswap = self.parseString(string, quiet = True)
             self.validator.validate(tempSiteswap)
             if tempSiteswap.valid and not tempSiteswap.isEmpty():
                 siteswapList.append(string)
@@ -228,7 +237,6 @@ class SiteswapTool(object):
     def printDict(self, dictionary):
         for index in dictionary:
             print(str(index) + ": " + str(dictionary[index]))
-
 
 
 

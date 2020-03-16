@@ -329,7 +329,7 @@ class Siteswap(object):
         self.next = None
         self.left = ThrowNode()
         self.right = ThrowNode()
-        
+
     def getRethrowStr(self):
         """Returns a string representation of the structure's rethrow values in MHN format"""
         string = ""
@@ -393,6 +393,20 @@ class Siteswap(object):
             length += 1
             probe = probe.next
         return length + 1
+
+    def getSimpleString(self):
+        """Returns a string representation of the structure in MHN format"""
+
+
+        if self.isVanilla():
+            return self.getJlabString()
+        else:
+            string = ""
+            i = 0
+            probe = self
+            for node in self:
+                string += ("(%s,%s)" % (node.left.getSimpleString(), node.right.getSimpleString()))
+            return string
 
     def __str__(self):
         """Returns a string representation of the structure in MHN format"""

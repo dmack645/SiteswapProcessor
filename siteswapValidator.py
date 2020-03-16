@@ -2,13 +2,15 @@ from siteswap import Siteswap
 from throwNode import ThrowNode
 
 class SiteswapValidator(object):
-    """Receives a string input, stores it in Siteswap linked structure, and validates"""
+
     def __init__(self):
         self.pattern = Siteswap()
 
     def validate(self, pattern):
+        """Receives a Siteswap input and validates"""
         self.pattern = pattern
-
+        if self.pattern.isVanilla() and len(self.pattern) % 2 != 0: 
+            self.pattern.makeSymmetric()
 
         self.fillRethrowLine() 
 
