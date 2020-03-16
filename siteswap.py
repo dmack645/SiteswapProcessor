@@ -15,7 +15,7 @@ Description:   This module defines a class termNode. This represents the availab
                linked structures (implements the circular rule of siteswap for free).
                This class contains the bulk of methods that can be applied to a pattern.
 ***************************************************************************
-"""
+""" 
 # Might be good to create a validator class or function
 '''
 getState fills in "state" class variable for each term in the pattern
@@ -189,7 +189,6 @@ class Siteswap(object):
             probe = probe.next
             i += 1
 
-
     def makeAsymmetric(self):
         """
         Throws out second half of pattern.
@@ -208,7 +207,6 @@ class Siteswap(object):
 
             # Link this probe to self, removing second half from structure
             probe.next = self
-
 
     def getNumberProps(self):
         """Returns the number of props being juggled"""
@@ -315,25 +313,7 @@ class Siteswap(object):
             index += 1
 
         return True
-    '''
-        while index < length:
-            if len(probe.left) == 0 and len(probe.right) >=1:
-                if hand == 'r':
-                    return False
-                else:
-                    hand = 'r'
-            elif len(probe.left) >= 1 and len(probe.right) == 0:
-                if hand == 'l':
-                    return False
-                else:
-                    hand = 'l'
-            elif len(probe.left) >= 1 and len(probe.right) >= 1:
-                return False
-            probe = probe.next 
-            index += 1
 
-        return True
-    '''
     def isEmpty(self):
         """
         Returns True if no throws made this term and there's no next term.
@@ -477,9 +457,6 @@ class Siteswap(object):
                 probe = probe.next
             return string
 
-
-
-
     def __iter__(self): 
         """"Returns iterable object. Allows for 'for' loops and iter()"""
         self.probe = self
@@ -496,7 +473,7 @@ class Siteswap(object):
             self.i += 1
             return temp  
 
-     
+
 
     '''
     # TO BE USED LATER

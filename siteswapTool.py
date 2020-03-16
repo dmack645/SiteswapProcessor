@@ -1,6 +1,6 @@
 """
 ***************************************************************************
-Filename:      siteswapValidator.py
+Filename:      siteswapTool.py
 
 Author:        David Mackie
 
@@ -16,7 +16,7 @@ Description:   This module defines a class SiteswapValidator. Objects of
                MHN notation. It then prints whether or not the siteswap 
                is valid, along with the MHN and checking line. 
 ***************************************************************************
-"""
+""" 
 
 from siteswapParser import Parser
 from siteswap import Siteswap
@@ -25,9 +25,15 @@ from stateGenerator import StateGenerator
 import os
 import webbrowser
 """
-NOTES:
+TODO
 ADD DELETE/INSERT/MOVE FEATURE FOR TXT FILES
 CONVERT FROM MHN STRUCTURE TO STRING IN JLAB NOTATION 
+
+
+Program can run .bat files to use command prompt. (echo off)
+select state and generate possible transitions into/out of pattern (select period)
+
+BUGS
 
 """
 
@@ -87,6 +93,8 @@ class SiteswapTool(object):
         textDict = self.getTextFilesDict()
         self.printDict(textDict)
         print("\nEnter index of file to open or press enter to continue: ", end = '')
+
+        # User inputs index option or continues
         while True:
             fileIndex = input()
             if fileIndex == '':
@@ -107,7 +115,7 @@ class SiteswapTool(object):
                     elif siteswapIndex.isdigit() and (int(siteswapIndex) - 1) in range(len(siteswapDict)):
                         self.rawSiteswap = siteswapDict[int(siteswapIndex)]
                         self.siteswap = self.parseString(siteswapDict[int(siteswapIndex)])
-                        self.validator.validate(self.siteswap)
+                        self.validator.validate(self.siteswap) # add param "raw = True"
                         self.siteswap.printSiteswap()
                         file.close()
                         return
