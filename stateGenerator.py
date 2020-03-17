@@ -8,33 +8,12 @@ class StateGenerator(object):
     def __init__(self):
         self.validator = SiteswapValidator()
 
-    def fillStates(self):
-        index = 0 
-
-        # Fill in first node according to number of throws to come from left/right hand
-        while self.state.propCount() < self.pattern.getNumberProps():
-            self.loadFirstNode(self.pattern)
-            self.throwThis()
- 
-            index += 1 # Index keeps track of position in pattern
-            if index == len(self.pattern):
-                index = 0  
-            #print("balls: " + str(self.state.propCount()))
-        
-        # Rotate back to beginning of original pattern
-        while index != 0:
-            self.throwThis()
-
-            index += 1
-            if index == len(self.pattern):
-                break
-
     def printStates(self, pattern, quiet = False):
         self.pattern = pattern
         self.state = StateNode()
         self.validator.validate(self.pattern)
 
-        if not self.validator.isValid():
+        if not self.pattern.isValid():
             print("Siteswap invalid - cannot generate states")
 
         if self.pattern.isEmpty():
@@ -44,21 +23,26 @@ class StateGenerator(object):
         self.pattern = self.pattern
         self.fillStates()
 
-        
-
         if not quiet: 
-            print("Siteswap: \n" + self.pattern.getSimpleString())
+            print("Siteswap: " + self.pattern.getSimpleString())
             print()
             print("States:")
             maxLength = self.getMaxStateLength()
+
             if self.pattern.isVanilla():
                 hand = self.pattern.getVanillaFirstHand()
                 foundValue = False
                 index = 0
-                while index < len(self.pattern):
-                    stateString = self.getVanillaStateString()
-                    #       string += "({:^{}})".format(str(node.index), width)
+                if not self.pattern.isSymmetric():
+                    length = len(self.pattern)
+                else: 
+                    length = len(self.pattern) // 2
+
+                while index < length:
+                    stateString = self.getVanillaStateString() # fix this function
+
                     print('{:<{}}'.format(stateString, maxLength), end = '  --> ')
+
                     if hand == 'r':
                         print(self.pattern.right.getSimpleString())
                         if not self.pattern.right.isNull() and not foundValue:
@@ -88,8 +72,46 @@ class StateGenerator(object):
                     self.throwThis()
                     index +=1
                     print()
-            
+            #print("symmetric: " +  str(self.pattern.isSymmetric))
 
+    def fillStates(self):
+        index = 0 
+
+        # Fill in first node according to number of throws to come from left/right hand
+        while self.state.propCount() < self.pattern.getNumberProps():
+            self.loadFirstNode(self.pattern)
+            self.throwThis()
+ 
+            index += 1 # Index keeps track of position in pattern
+            if index == len(self.pattern):
+                index = 0  
+            #print("balls: " + str(self.state.propCount()))
+
+
+        # Rotate back to beginning of original pattern
+        while True:
+            self.throwThis()
+
+            index += 1
+            if index == len(self.pattern):
+                break
+
+        index = 0
+        while index < len(self.pattern):
+            self.pattern.state = deepcopy(self.state)
+            self.throwThis()
+            index += 1
+
+        '''
+        while True:
+            self.throwThis()
+
+            index += 1
+            if index == len(self.pattern):
+                break
+        '''
+
+        # Go through whole pattern and add deepcopy of state to each term
 
     def getVanillaStateString(self):
             if not self.pattern.isVanilla():

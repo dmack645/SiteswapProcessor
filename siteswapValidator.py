@@ -14,26 +14,12 @@ class SiteswapValidator(object):
 
         self.fillRethrowLine() 
 
-        if self.isValid():
+        if self.pattern.isValid():
             self.pattern.setValidity(True)
         else:
             self.tryAgainSymmetric()
 
-        return self.pattern.valid
-
-    def isValid(self):
-        for term in self.pattern:
-            for throw in term.right:
-                if throw.throw == None and throw.rethrow != None:
-                    return False
-                if throw.throw != None and throw.rethrow == None:
-                    return False
-            for throw in term.left:
-                if throw.throw == None and throw.rethrow != None:
-                    return False
-                if throw.throw != None and throw.rethrow == None:
-                    return False
-        return True
+        return self.pattern.isValid()
 
     def fillRethrowLine(self):
         """Fill in the rethrow line for validation"""
@@ -202,7 +188,7 @@ class SiteswapValidator(object):
         self.pattern.makeSymmetric()
         self.fillRethrowLine()
 
-        if self.isValid():
+        if self.pattern.isValid():
             self.pattern.setValidity(True)
         else:
             self.pattern.setValidity(False)

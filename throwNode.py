@@ -16,7 +16,7 @@ Description:   This module defines a class ThrowNode. This represents a
 """
 
 class ThrowNode(object):
-
+    # Add throw sort method (largest to smallest)
     def __init__(self, throw = None, throwX = False, next = None):
         """Instantiates a Node with a default next link of None and no throw value."""
         self.throw = throw              # siteswap value
@@ -234,6 +234,32 @@ class ThrowNode(object):
             i += 1
 
         return string
+
+    def isEqual(self, other):
+        if other == None:
+            return False
+
+        probe1 = self
+        probe2 = other
+
+        if probe1.isNull() and probe2.isNull():
+            return True
+        if len(probe1) != len(probe2):
+            return False
+
+        length = len(probe1)
+        i = 0
+        while i < length:
+            if probe1.isNull() and probe2.isNull():
+                pass
+            elif ((probe1.throw == probe2.throw) and (probe1.throwX == probe2.throwX)):
+                pass 
+            else:
+                return False
+            probe1 = probe1.next
+            probe2 = probe2.next
+            i += 1
+        return True
 
     def __iter__(self): 
         """"

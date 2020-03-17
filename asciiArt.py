@@ -1,3 +1,6 @@
+import textwrap
+from terminalSize import get_terminal_size
+
 juggler = [
 """
           oo
@@ -117,6 +120,16 @@ juggler = [
                              | /
                             /`^\\_
                             `.____\\
+""",
+"""
+                   o
+           o                o
+                   o
+    o       o             o       o
+
+ \\__O___o                     o___O__/
+   \\+/                           \\*/
+  _/ )_    Siteswap is Fun!     _( \\_
 """
 
 ]
@@ -124,7 +137,9 @@ juggler = [
 
 def getArt(index):
     count = len(juggler)
-    if index in range(0,count):
+    if index in range(0, count):
+
+
         return juggler[index]
     else:
         return("Invalid ascii art call")

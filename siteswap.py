@@ -42,11 +42,13 @@ class Siteswap(object):
         self.valid = True
         self.errorString = ""
         self.symmetric = False
+        self.modified = False
 
         self.rethrowsNotShown = False
         self.rethrowsNotShownStr = ""
 
         self.index = None
+        self.state = None
 
     def addTerm(self, term):
         """
@@ -70,11 +72,11 @@ class Siteswap(object):
 
     def getTerm(self, index = 0):
         """Returns the term at the given index relative to self"""
-
-        for term in self:
-            if index == 0 or term.next is self:
-                return term
+        probe = self
+        while index != 0:
+            probe = probe.next    
             index -= 1
+        return probe
 
     def getIndex(self, term):
         """Returns the index of the term relative to self (self has index = 0"""
@@ -146,16 +148,49 @@ class Siteswap(object):
             probe = probe.next
         return True
 
-    def isInvalidFull(self, hand):
-        if hand == 'l':
-            probe = self.left
-        else: 
-            probe = self.right
+    def isValid(self):
+        for term in self:
+            for throw in term.right:
+                if throw.throw == None and throw.rethrow != None:
+                    return False
+                if throw.throw != None and throw.rethrow == None:
+                    return False
+            for throw in term.left:
+                if throw.throw == None and throw.rethrow != None:
+                    return False
+                if throw.throw != None and throw.rethrow == None:
+                    return False
+        return True
 
-        while probe != None:
-            if probe.invalidRethrow == None:
+    def isSymmetric(self):
+        # Eventually add support for odd period patterns (for weird MHN patterns with symmetric middle term)
+        length = len(self)
+
+        if length % 2 != 0:
+            return False
+
+        outerIndex = 0
+
+        laggingProbe = self
+        leadingProbe = self.getTerm(length//2) # Points to first term in second half
+
+        # Search for node at the last position
+        # leadingProbe points to end, laggingProbe follows from beginning
+        while outerIndex < (length//2):
+            if (not laggingProbe.left.isEqual(leadingProbe.right) or (not laggingProbe.right.isEqual(leadingProbe.left))):
+                innerIndex = 0
+                while innerIndex < length:
+                    leadingProbe.symmetric = False
+                    leadingProbe = leadingProbe.next
+                    innerIndex += 1
                 return False
-            probe = probe.next
+
+            else:
+                leadingProbe.symmetric = True
+                laggingProbe.symmetric = True
+                leadingProbe = leadingProbe.next
+                laggingProbe = laggingProbe.next
+                outerIndex += 1
         return True
 
     def makeSymmetric(self):
@@ -311,6 +346,18 @@ class Siteswap(object):
             probe = probe.next 
             index += 1
 
+        return True
+
+    def isInvalidFull(self, hand):
+        if hand == 'l':
+            probe = self.left
+        else: 
+            probe = self.right
+
+        while probe != None:
+            if probe.invalidRethrow == None:
+                return False
+            probe = probe.next
         return True
 
     def isEmpty(self):

@@ -36,6 +36,8 @@ CONVERT FROM MHN STRUCTURE TO STRING IN JLAB NOTATION
 Program can run .bat files to use command prompt. (echo off)
 select state and generate possible transitions into/out of pattern (select period)
 
+Fix parser to not allow 0 in multiplex throw(as first [012] or otherwise [12303])
+strip user input of lagging whitespace
 """
 
 class SiteswapTool(object):
@@ -43,21 +45,25 @@ class SiteswapTool(object):
     def __init__(self):
         self.width = get_terminal_size()[0]
         self.header = ""
-        self.jugglingArt = 0
+        self.jugglingArt = 6
+        self.rawSiteswap = ''
 
         for i in range(0, self.width -1):
             self.header += '*'
 
-        print(self.header + '\n' + '{:^{}}'.format("SITESWAP IS FUN!", self.width))
-        print(getArt(self.jugglingArt))
+        if self.jugglingArt != 6:
+            print(self.header + '\n' + '{:^{}}'.format("SITESWAP IS FUN!", self.width))
+            print(self.header)
+        else:
+            print(self.header)
+            print('{:^{}}'.format(getArt(self.jugglingArt), self.width) +'\n' + self.header)
         self.siteswap = Siteswap()          # Empty siteswap
         self.userString = ""
         self.validator = SiteswapValidator()
 
     def run(self):
-        print('{:^{}}'.format("Enter \"i\" for command list and info.", self.width) + self.header)
+        print("Enter \"i\" for command list and info.\n")
         self.getUserInput()
-
 
     def getUserInput(self):
         while True:
@@ -70,13 +76,18 @@ class SiteswapTool(object):
                 self.saveSiteswap()
             elif self.userString == 'l':
                 self.chooseSiteswap()
+            elif self.userString == 'p':
+                self.siteswap.printSiteswap()
             elif self.userString == 'sr' or self.userString == 'sl':
                 self.shift(self.userString)
                 self.siteswap.printSiteswap()
             
+            elif self.userString == 'states':
+                stateMachine = StateGenerator()
+                print()
+                stateMachine.printStates(self.siteswap)
             elif self.userString == 'state':
-                self.stateMachine = StateGenerator()
-                self.stateMachine.printStates(self.siteswap)
+                self.pickState()
 
             elif self.userString == 'a':
                 jLab = self.siteswap.getJlabString()
@@ -93,7 +104,7 @@ class SiteswapTool(object):
                 self.validator.validate(tempSiteswap)
 
                 if tempSiteswap is self.siteswap:
-                    pass
+                    print() # Parsing error
                 else:
                     self.siteswap = tempSiteswap
                     self.rawSiteswap = self.userString
@@ -106,15 +117,43 @@ class SiteswapTool(object):
                 self.header += '*'
             print(self.header)
 
+    def pickState(self):
+        stateMachine = StateGenerator()
+        stateMachine.printStates(self.siteswap, quiet = True)
+        while(True):
+            index = input("\nEnter index of state to view: ")
+            if index == '':
+                print()
+                return
+            elif not index.isdigit():
+                print("\nInvalid input.")
+                continue
+            elif int(index) in range(0, len(self.siteswap)):
+                temp = self.siteswap.getTerm(int(index))
+                stateMachine.printStates(temp, quiet = True)
+                string = ""
+                if self.siteswap.isVanilla():
+                    string = stateMachine.getVanillaStateString()
+                else:
+                    string = str(temp.state)
+
+                print("\nSiteswap: "+ temp.getSimpleString())
+                print("Current State: " + string)
+
+            else:
+                print("\nInvalid input.")
+
     def chooseSiteswap(self):
         textDict = self.getTextFilesDict()
+        print("\nText files found:")
         self.printDict(textDict)
-        print("\nEnter index of file to open or press enter to continue: ", end = '')
+        print("\nEnter pattern index or Enter to go back: ", end = '')
 
         # User inputs index option or continues
         while True:
             fileIndex = input()
             if fileIndex == '':
+                print()
                 return
 
             elif fileIndex.isdigit() and (int(fileIndex) - 1)  in range(len(textDict)):
@@ -123,25 +162,25 @@ class SiteswapTool(object):
                 siteswapDict = self.getSiteswapDict(file)
                 self.printDict(siteswapDict)
 
-                print("\nEnter index of siteswap to open or press enter to continue: ", end = '')
+
                 while True:
+                    print("\nEnter siteswap index or Enter to go back: ", end = '')
                     siteswapIndex = input()
                     if siteswapIndex == '': 
                         file.close()
+                        print()
                         return
                     elif siteswapIndex.isdigit() and (int(siteswapIndex) - 1) in range(len(siteswapDict)):
                         self.rawSiteswap = siteswapDict[int(siteswapIndex)]
-                        tempSiteswap = self.parseString(siteswapDict[int(siteswapIndex)])
-                        self.validator.validate(tempSiteswap) # detect for vanilla in validator
-                        if tempSiteswap.valid:
-                            self.siteswap = tempSiteswap
-                            self.siteswap.printSiteswap()
+                        self.siteswap = self.parseString(siteswapDict[int(siteswapIndex)])
+                        self.validator.validate(self.siteswap) # detect for vanilla in validator
+                        self.siteswap.printSiteswap()
                         file.close()
                         return
                     else: 
-                        print("Invalid input. Try again: ", end = '')
+                        print("\nInvalid input.")
 
-            else: print("Invalid input. Try again: ", end = '')     
+            else: print("\nInvalid input.")     
 
     def parseString(self, string, quiet = False):
         tempSiteswap = Siteswap()
@@ -163,11 +202,12 @@ class SiteswapTool(object):
         if len(textDict) == 0:
             self.createNewFile()
         else:
-            print("Text files found:")
+            print("\nText files found:")
+            self.printDict(textDict)
 
             while True:
-                self.printDict(textDict)
-                print("\nEnter index of file to open or 'n' for new file: ", end = '')
+
+                print('\nEnter file index or "n" for new file: ', end = '')
                 fileIndex = input()
                 if fileIndex == '':
                     return
@@ -187,24 +227,29 @@ class SiteswapTool(object):
 
                     while True:
                         yesno = input("\nWrite to this file? (y/n): ")
-                        if yesno == "y" or "Y" or "":
+                        if yesno == "y" or yesno == "Y":
                             file.write(str(self.rawSiteswap) + '\n')
                             file.close()
+                            print()
                             return
                         else:
                             file.close()
-                            break
-                else: print("Invalid input. Try again: ", end = '')
+                            print()
+                            return
+                else: print("\nInvalid input.")
 
     def createNewFile(self):
-        fileName = input("Enter new file name: ")
+        fileName = input("\nEnter new file name: ")
+        fileName += ".txt"
         try:
             file = open(fileName, "w") # "w" for 'write'. Creates file if not already there
             file.write(str(self.rawSiteswap) + '\n')
             file.close()
+            print()
         except Exception as e:
             print("Error writing to file:")
             #print(e)
+            print()
 
     def shift(self, direction):
         if self.siteswap.isEmpty() or len(self.siteswap) == 1:
@@ -220,10 +265,13 @@ class SiteswapTool(object):
     def getSiteswapDict(self, file):
         siteswapList = list()
         for string in file:
-            
-            tempSiteswap = self.parseString(string, quiet = True)
+            try:
+                tempSiteswap = self.parseString(string, quiet = True)
+            except:
+                tempSiteswap = Siteswap()
+                continue
             self.validator.validate(tempSiteswap)
-            if tempSiteswap.valid and not tempSiteswap.isEmpty():
+            if not tempSiteswap.isEmpty():
                 siteswapList.append(string)
 
         if len(siteswapList) == 0:
@@ -249,16 +297,33 @@ class SiteswapTool(object):
     def printDict(self, dictionary):
         for index in dictionary:
             print(str(index) + ": " + str(dictionary[index]))
+    
     def printInfo(self):
         info = """
-The Parser accepts most valid Juggling Lab siteswap notation (solo only)
-It assumes implicit null beat after each sync term if no "-" values present
+COMMANDS:
+'s'      : save siteswap to text file (existing or new)
+'l'      : load siteswap from text file
+'jlab'   : display notation used for JugglingLab notation
+'a'      : animate in default browser using Juggling Lab
+'p'      : print siteswap
+'sr'     : shift right and print
+'sl'     : shift left and print
+'states' : print all states
+'state'  : select index of state to print
 
 "!" suffix on input term removes next implicit null beat
 "*" suffix on input pattern appends hands-exchanged repeat to pattern
-"R"/"L" prefix specifies hand 
-If input is invalid and/or vanilla, the  
+"R"/"L" prefix on input throw specifies which hand makes this throws
+    (reverts back to alternating hands afterwards if vanilla)
 
+Parser accepts most valid Juggling Lab siteswap notation (solo only).
+Parser assumes implicit null beat after each sync term if no "-" values present.
+Parser attempts to fill structure exactly as written.
+
+Validator checks and possibly corrects pattern.
+If siteswap invalid, validator tries symmetric form before giving up.
+    (This means you can either enter "(6x,4)" or "(6x,4)*")
+Odd lengthed vanilla siteswaps are made symmetric before validation.
 
 """
         print(info)
@@ -266,8 +331,6 @@ If input is invalid and/or vanilla, the
 
 def main():
     generator = SiteswapTool()
-
-
     generator.run()
 
 if __name__ == "__main__": main()
