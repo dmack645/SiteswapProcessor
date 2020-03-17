@@ -1,5 +1,5 @@
 from siteswap import Siteswap
-from throwNode import ThrowNode
+from throwNode import ThrowNode 
 
 class SiteswapValidator(object):
 

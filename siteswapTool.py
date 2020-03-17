@@ -24,6 +24,9 @@ from siteswapValidator import SiteswapValidator
 from stateGenerator import StateGenerator
 import os
 import webbrowser
+from terminalSize import get_terminal_size
+from asciiArt import getArt
+
 """
 TODO
 ADD DELETE/INSERT/MOVE FEATURE FOR TXT FILES
@@ -33,34 +36,36 @@ CONVERT FROM MHN STRUCTURE TO STRING IN JLAB NOTATION
 Program can run .bat files to use command prompt. (echo off)
 select state and generate possible transitions into/out of pattern (select period)
 
-BUGS
-
 """
 
 class SiteswapTool(object):
+    
     def __init__(self):
-        self.header = "\n********************************************************************************************"
+        self.width = get_terminal_size()[0]
+        self.header = ""
+        self.jugglingArt = 0
+
+        for i in range(0, self.width -1):
+            self.header += '*'
+
+        print(self.header + '\n' + '{:^{}}'.format("SITESWAP IS FUN!", self.width))
+        print(getArt(self.jugglingArt))
         self.siteswap = Siteswap()          # Empty siteswap
         self.userString = ""
         self.validator = SiteswapValidator()
 
     def run(self):
-        textDict = self.getTextFilesDict()
-        if len(textDict) == 0:
-            self.getUserInput()
+        print('{:^{}}'.format("Enter \"i\" for command list and info.", self.width) + self.header)
+        self.getUserInput()
 
-        else:
-            print(self.header)
-            print("Text files found:")
-            self.chooseSiteswap()
-            self.getUserInput()
 
     def getUserInput(self):
         while True:
-            print(self.header)
-            self.userString = input("Enter siteswap or option: ")
+            self.userString = input("Enter siteswap or command: ")
             if self.userString == '': 
                 break
+            elif self.userString == 'i':
+                self.printInfo()
             elif self.userString == 's':
                 self.saveSiteswap()
             elif self.userString == 'l':
@@ -81,18 +86,25 @@ class SiteswapTool(object):
                 print("Attempting to load Juggling Lab gif in default browser.")
                 print(jLab)
             elif self.userString == 'jlab':
-                print("Current pattern in Juggling Lab compatible siteswap notation: ")
+                #print("Current pattern in Juggling Lab compatible siteswap notation: ")
                 print(self.siteswap.getJlabString())
             else:
                 tempSiteswap = self.parseString(self.userString)
                 self.validator.validate(tempSiteswap)
 
                 if tempSiteswap is self.siteswap:
-                    continue
+                    pass
                 else:
                     self.siteswap = tempSiteswap
                     self.rawSiteswap = self.userString
                     self.siteswap.printSiteswap()
+
+            self.width = get_terminal_size()[0]
+            self.header = ""
+
+            for i in range(0, self.width -1):
+                self.header += '*'
+            print(self.header)
 
     def chooseSiteswap(self):
         textDict = self.getTextFilesDict()
@@ -237,7 +249,19 @@ class SiteswapTool(object):
     def printDict(self, dictionary):
         for index in dictionary:
             print(str(index) + ": " + str(dictionary[index]))
+    def printInfo(self):
+        info = """
+The Parser accepts most valid Juggling Lab siteswap notation (solo only)
+It assumes implicit null beat after each sync term if no "-" values present
 
+"!" suffix on input term removes next implicit null beat
+"*" suffix on input pattern appends hands-exchanged repeat to pattern
+"R"/"L" prefix specifies hand 
+If input is invalid and/or vanilla, the  
+
+
+"""
+        print(info)
 
 
 def main():

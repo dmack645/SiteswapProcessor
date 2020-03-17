@@ -39,7 +39,6 @@ class Siteswap(object):
         self.left = left
         self.right = right
         self.next = next
-
         self.valid = True
         self.errorString = ""
         self.symmetric = False

@@ -45,7 +45,7 @@ class StateGenerator(object):
         self.fillStates()
 
         
-        #'{:10}'.format('test')
+
         if not quiet: 
             print("Siteswap: \n" + self.pattern.getSimpleString())
             print()
