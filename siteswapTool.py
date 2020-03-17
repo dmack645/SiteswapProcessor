@@ -239,7 +239,10 @@ class SiteswapTool(object):
                 else: print("\nInvalid input.")
 
     def createNewFile(self):
-        fileName = input("\nEnter new file name: ")
+        fileName = input("\nEnter new file name or press Enter: ")
+        if fileName == "":
+            print()
+            return
         fileName += ".txt"
         try:
             file = open(fileName, "w") # "w" for 'write'. Creates file if not already there
