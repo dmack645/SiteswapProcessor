@@ -8,71 +8,18 @@ class StateGenerator(object):
     def __init__(self):
         self.validator = SiteswapValidator()
 
-    def printStates(self, pattern, quiet = False):
+    def generate(self, pattern):
         self.pattern = pattern
         self.state = StateNode()
         self.validator.validate(self.pattern)
 
-        if not self.pattern.isValid():
-            print("Siteswap invalid - cannot generate states")
 
-        if self.pattern.isEmpty():
-            self.pattern.state = self.state
+
+        if self.pattern.isEmpty() or not self.pattern.isValid():
             return
 
         self.pattern = self.pattern
         self.fillStates()
-
-        if not quiet: 
-            print("Siteswap: " + self.pattern.getSimpleString())
-            print()
-            print("States:")
-            maxLength = self.getMaxStateLength()
-
-            if self.pattern.isVanilla():
-                hand = self.pattern.getVanillaFirstHand()
-                foundValue = False
-                index = 0
-                if not self.pattern.isSymmetric():
-                    length = len(self.pattern)
-                else: 
-                    length = len(self.pattern) // 2
-
-                while index < length:
-                    stateString = self.getVanillaStateString() # fix this function
-
-                    print('{:<{}}'.format(stateString, maxLength), end = '  --> ')
-
-                    if hand == 'r':
-                        print(self.pattern.right.getSimpleString())
-                        if not self.pattern.right.isNull() and not foundValue:
-                            foundValue = True
-                        if foundValue:
-                            hand = 'l'
-                    else:
-                        print(self.pattern.left.getSimpleString())
-                        if not self.pattern.left.isNull() and not foundValue:
-                            foundValue = True
-                        if foundValue:
-                            hand = 'r'
-
-                    self.throwThis()
-
-                    index +=1
-                    print()
-
-            else:
-                maxLength *= 5
-
-                index = 0
-                while index < len(self.pattern):
-                    print('{:<{}}'.format(str(self.state), maxLength), end = '  --> ')
-
-                    print("(%s,%s)" % (self.pattern.left.getSimpleString(), self.pattern.right.getSimpleString()))
-                    self.throwThis()
-                    index +=1
-                    print()
-            #print("symmetric: " +  str(self.pattern.isSymmetric))
 
     def fillStates(self):
         index = 0 
@@ -113,26 +60,6 @@ class StateGenerator(object):
 
         # Go through whole pattern and add deepcopy of state to each term
 
-    def getVanillaStateString(self):
-            if not self.pattern.isVanilla():
-                return "attempted to get vanilla state string when not vanilla"
-            string = ""
-            index = 0
-            stateProbe = self.state
-
-            while index < len(self.state):
-                # Test to see if self.state.throwThis() alters self.state
-                # I'm pretty sure it must
-                if stateProbe.right == 0 and stateProbe.left == 0:
-                    string += '0'
-                elif stateProbe.right != 0:
-                    string += str(stateProbe.right)
-                else:
-                    string += str(stateProbe.left)    
-                index += 1
-                if stateProbe.next != None: stateProbe = stateProbe.next
-            return string
-
     def throwThis(self):
         self.state
         for throw in self.pattern.left:
@@ -165,24 +92,7 @@ class StateGenerator(object):
                 print("error loading first term(r)")
             self.state.right = len(term.right)
 
-    def getMaxStateLength(self):
-        """
-        Returns the max state length (I think this is always largest SS value)
-        """
-        tempPattern = deepcopy(self.pattern)
-        tempState = deepcopy(self.state)
 
-        maxLength = 0
-        index = 0
-
-        # Find state length for each position in pattern
-        while index < len(self.pattern): 
-            maxLength = max(len(self.state), maxLength)
-            self.throwThis()
-            index += 1
-        self.pattern = tempPattern
-        self.state = tempState
-        return maxLength
 
 
 

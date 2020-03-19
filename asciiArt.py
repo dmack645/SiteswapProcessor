@@ -129,8 +129,7 @@ juggler = [
 
  \\__O___o                     o___O__/
    \\+/                           \\*/
-  _/ )_    Siteswap is Fun!     _( \\_
-"""
+  _/ )_    Siteswap is Fun!     _( \\_"""
 
 ]
 

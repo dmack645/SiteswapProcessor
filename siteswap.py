@@ -376,6 +376,28 @@ class Siteswap(object):
         self.left = ThrowNode()
         self.right = ThrowNode()
 
+    def getMaxStateLength(self):
+        """
+        Returns the max state length (I think this is always largest SS value)
+        """
+        if self.state == None:
+            return 0
+
+        probe = self
+        maxLength = 0
+        index = 0
+
+        # Find state length for each position in pattern
+        while index < len(self): 
+            if probe.state == None:
+                print("Bug: getMaxStateLength found an empty state in pattern")
+                return 0
+            maxLength = max(len(probe.state), maxLength)
+            probe = probe.next
+            index += 1
+
+        return maxLength
+
     def getRethrowStr(self):
         """Returns a string representation of the structure's rethrow values in MHN format"""
         string = ""
@@ -473,14 +495,14 @@ class Siteswap(object):
 
         if not self.isVanilla():
             for node in self:   # REVISE THIS TO USE PROBE~~~~~~~~~~~~
-                if str(node.left) == '-':
+                if node.left.getSimpleString() == '-':
                     left = '0'
                 else:
-                    left = str(node.left)
-                if str(node.right) == '-':
+                    left = node.left.getSimpleString()
+                if node.right.getSimpleString() == '-':
                     right = '0'
                 else:
-                    right = str(node.right)
+                    right = node.right.getSimpleString()
                 string += ("(%s,%s)!" % (left, right))
             return string
 
