@@ -15,7 +15,7 @@ Description:   This module defines a class termNode. This represents the availab
                linked structures (implements the circular rule of siteswap for free).
                This class contains the bulk of methods that can be applied to a pattern.
 ***************************************************************************
-""" 
+"""  
 # Might be good to create a validator class or function
 '''
 getState fills in "state" class variable for each term in the pattern
