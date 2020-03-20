@@ -17,6 +17,7 @@ Description:   This module defines a class SiteswapValidator. Objects of
                is valid, along with the MHN and checking line. 
 Notes should go here   
 ***************************************************************************
+EDIT
 """ 
 
 from siteswapParser import Parser
