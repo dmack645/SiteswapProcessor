@@ -355,7 +355,7 @@ class Siteswap(object):
             self.i += 1
             return temp  
 
-# EVERYTHING BELOW HERE NEEDS TO BE MOVED OR MODIFIED
+    # EVERYTHING BELOW HERE NEEDS TO BE MOVED OR MODIFIED!!!!
     # These two are better suited in siteswapHandler
     def getVanillaFirstHand(self): 
         index = 0
