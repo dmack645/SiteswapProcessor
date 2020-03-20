@@ -13,7 +13,7 @@ class SiteswapHandler(object):
 
     def parseString(self, string, quiet = True):
         tempSiteswap = Siteswap()
-        parser = Parser()               # Create Parser object
+        parser = Parser()               
 
         try:
             tempSiteswap = parser.parse(string)
@@ -23,7 +23,7 @@ class SiteswapHandler(object):
                 print("Error:")
                 print(e)
             tempSiteswap.delete()
-            return False #self.siteswap
+            return False 
         return tempSiteswap
 
     def validate(self, siteswap):

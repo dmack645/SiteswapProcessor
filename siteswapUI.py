@@ -15,6 +15,7 @@ Description:   This module defines a class SiteswapValidator. Objects of
                circular linked structure that represents the siteswaps in 
                MHN notation. It then prints whether or not the siteswap 
                is valid, along with the MHN and checking line. 
+Notes should go here
 ***************************************************************************
 """ 
 

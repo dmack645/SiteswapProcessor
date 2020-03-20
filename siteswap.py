@@ -90,7 +90,7 @@ class Siteswap(object):
             probe = probe.next
         return -1
 
-    def setIndices(self):
+    def setIndices(self): # This is clunky. Shouldn't need self.index
         """Sets Siteswap self.index and ThrowNode self.index fields for the sitewap relative to self"""
         index = 0
         length = len(self)
@@ -118,7 +118,7 @@ class Siteswap(object):
                 throw = throw.next
 
             probe = probe.next
-            index += 1 
+            index += 1  
 
     def setValidity(self, validity):
         index = 0
@@ -136,17 +136,7 @@ class Siteswap(object):
             probe = probe.next 
             index += 1
 
-    def isRethrowFull(self, hand):
-        if hand == 'l':
-            probe = self.left
-        else: 
-            probe = self.right
 
-        while probe != None:
-            if probe.rethrow == None:
-                return False
-            probe = probe.next
-        return True
 
     def isValid(self):
         for term in self:
@@ -291,34 +281,7 @@ class Siteswap(object):
         else:
             return False
 
-    def getVanillaFirstHand(self):
-        index = 0
-        length = len(self)
-        probe = self
 
-        while index < length:
-            if probe.left.isNull() and not probe.right.isNull():
-                return 'r'
-            elif probe.right.isNull() and not probe.left.isNull():
-                return 'l'
-            probe = probe.next 
-            index += 1
-        return 'r'
-
-    def getVanillaFirstIndex(self):
-        index = 0
-        length = len(self)
-        probe = self
-
-        while index < length:
-            if probe.left.isNull() and probe.right.isNull():
-                probe = probe.next 
-                index += 1
-            else:
-                return index
-
-
-        return 0
 
     def isVanilla(self):
         """Returns True if async vanilla siteswap"""
@@ -348,19 +311,19 @@ class Siteswap(object):
 
         return True
 
-    def isInvalidFull(self, hand):
-        if hand == 'l':
-            probe = self.left
-        else: 
-            probe = self.right
+    def __len__(self):
+        """Returns the number of terms in the structure"""
+        probe = self
+        length = 0
+        if self.isEmpty():
+            return 0
 
-        while probe != None:
-            if probe.invalidRethrow == None:
-                return False
+        while probe.next != self:
+            length += 1
             probe = probe.next
-        return True
+        return length + 1
 
-    def isEmpty(self):
+    def isEmpty(self): # Eventually make Siteswap initialize circularly (not null terminated)
         """
         Returns True if no throws made this term and there's no next term.
         Otherwise, return False
@@ -376,9 +339,57 @@ class Siteswap(object):
         self.left = ThrowNode()
         self.right = ThrowNode()
 
-    def getMaxStateLength(self):
+    def __iter__(self): 
+        """"Returns iterable object. Allows for 'for' loops and iter()"""
+        self.probe = self
+        self.i = 0
+        return self
+  
+    def __next__(self):  
+        """Behavior of next() on iter(self)"""
+        if self.i >= len(self):
+            raise StopIteration 
+        else: 
+            temp = self.probe
+            self.probe = self.probe.next
+            self.i += 1
+            return temp  
+
+# EVERYTHING BELOW HERE NEEDS TO BE MOVED OR MODIFIED
+    # These two are better suited in siteswapHandler
+    def getVanillaFirstHand(self): 
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe.left.isNull() and not probe.right.isNull():
+                return 'r'
+            elif probe.right.isNull() and not probe.left.isNull():
+                return 'l'
+            probe = probe.next 
+            index += 1
+        return 'r'
+
+    def getVanillaFirstIndex(self):
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe.left.isNull() and probe.right.isNull():
+                probe = probe.next 
+                index += 1
+            else:
+                return index
+
+
+        return 0
+
+    # Maybe rename as getMax() (I think this is always largest SS value)
+    def getMaxStateLength(self): 
         """
-        Returns the max state length (I think this is always largest SS value)
+        Returns the max state length
         """
         if self.state == None:
             return 0
@@ -398,69 +409,43 @@ class Siteswap(object):
 
         return maxLength
 
-    def getRethrowStr(self):
-        """Returns a string representation of the structure's rethrow values in MHN format"""
-        string = ""
-        i = 0
-        probe = self
-        for node in self:
-            string += ("(%s,%s)" % (node.left.rethrowStr(), node.right.rethrowStr()))
-        return string
+    def isRethrowFull(self, hand):
+        if hand == 'l':
+            probe = self.left
+        else: 
+            probe = self.right
 
-    def getInvalidRethrowStr(self):
-        """Returns a string representation of the structure's rethrow values in MHN format"""
-        string = ""
-        i = 0
-        probe = self
-        for node in self:
-            string += ("(%s,%s)" % (node.left.invalidRethrowStr(), node.right.invalidRethrowStr()))
-        return string
-
-    def getIndexStr(self):
-        string = ""
-        tempString = ""
-        width = 0
-        for node in self:
-            tempString = ("%s,%s" % (str(node.left), str(node.right)))
-            width = len(tempString)
-            string += "({:^{}})".format(str(node.index), width)
-        return string
-
-    def printSiteswap(self):
-            if self.valid and not self.isEmpty():
-                self.setIndices()
-                print("\nValid %d-prop siteswap" % self.getNumberProps())
-                print("Indices:       " + self.getIndexStr())
-                print("Siteswap:      " + str(self))
-                print("Rethrow line:  " + self.getRethrowStr())
-                print()
-
-            elif not self.isEmpty(): 
-                self.setIndices()
-                print("\nInvalid siteswap")
-                print("Indices:       " + self.getIndexStr())
-                print("Siteswap:      " + str(self))
-                print("Rethrow lines: " + self.getRethrowStr())
-                print("               " + self.getInvalidRethrowStr())
-                if self.rethrowsNotShown:
-                    print(self.rethrowsNotShownStr)
-                    print()
-                else:
-                    print()
-            else:
-                print("Siteswap empty")
-
-    def __len__(self):
-        """Returns the number of terms in the structure"""
-        probe = self
-        length = 0
-        if self.isEmpty():
-            return 0
-
-        while probe.next != self:
-            length += 1
+        while probe != None:
+            if probe.rethrow == None:
+                return False
             probe = probe.next
-        return length + 1
+        return True
+
+    # These two are clunky and should be in validator.
+    # throwNode.invalidRethrow should be list or other struct
+    def isInvalidFull(self, hand): 
+        if hand == 'l':
+            probe = self.left
+        else: 
+            probe = self.right
+
+        while probe != None:
+            if probe.invalidRethrow == None:
+                return False
+            probe = probe.next
+        return True
+
+    # __str__ should return simple string. Swap these
+    def __str__(self): 
+        """Returns a string representation of the structure in MHN format"""
+
+        string = ""
+        i = 0
+        probe = self
+
+        for node in self:
+            string += ("(%s,%s)" % (str(node.left), str(node.right)))
+        return string
 
     def getSimpleString(self):
         """Returns a string representation of the structure in MHN format"""
@@ -476,17 +461,7 @@ class Siteswap(object):
                 string += ("(%s,%s)" % (node.left.getSimpleString(), node.right.getSimpleString()))
             return string
 
-    def __str__(self):
-        """Returns a string representation of the structure in MHN format"""
-
-        string = ""
-        i = 0
-        probe = self
-
-        for node in self:
-            string += ("(%s,%s)" % (str(node.left), str(node.right)))
-        return string
-
+    # Should be in handler or UI. Probably UI because Siteswap member
     def getJlabString(self):
         """Returns a string representation of the structure in JLAB format"""
         string = ""
@@ -539,21 +514,58 @@ class Siteswap(object):
                 probe = probe.next
             return string
 
-    def __iter__(self): 
-        """"Returns iterable object. Allows for 'for' loops and iter()"""
-        self.probe = self
-        self.i = 0
-        return self
-  
-    def __next__(self):  
-        """Behavior of next() on iter(self)"""
-        if self.i >= len(self):
-            raise StopIteration 
-        else: 
-            temp = self.probe
-            self.probe = self.probe.next
-            self.i += 1
-            return temp  
+    def getRethrowStr(self):
+        """Returns a string representation of the structure's rethrow values in MHN format"""
+        string = ""
+        i = 0
+        probe = self
+        for node in self:
+            string += ("(%s,%s)" % (node.left.rethrowStr(), node.right.rethrowStr()))
+        return string
+
+    def getInvalidRethrowStr(self):
+        """Returns a string representation of the structure's rethrow values in MHN format"""
+        string = ""
+        i = 0
+        probe = self
+        for node in self:
+            string += ("(%s,%s)" % (node.left.invalidRethrowStr(), node.right.invalidRethrowStr()))
+        return string
+
+    def getIndexStr(self): # self.index not needed. 
+        string = ""
+        tempString = ""
+        width = 0
+        for node in self:
+            tempString = ("%s,%s" % (str(node.left), str(node.right)))
+            width = len(tempString)
+            string += "({:^{}})".format(str(node.index), width)
+        return string
+    
+    # This and its dependencies should be in siteswapUI or siteswapHandler
+    def printSiteswap(self): 
+        if self.valid and not self.isEmpty():
+            self.setIndices()
+            print("\nValid %d-prop siteswap" % self.getNumberProps())
+            print("Indices:       " + self.getIndexStr())
+            print("Siteswap:      " + str(self))
+            print("Rethrow line:  " + self.getRethrowStr())
+            print()
+
+        elif not self.isEmpty(): 
+            self.setIndices()
+            print("\nInvalid siteswap")
+            print("Indices:       " + self.getIndexStr())
+            print("Siteswap:      " + str(self))
+            print("Rethrow lines: " + self.getRethrowStr())
+            print("               " + self.getInvalidRethrowStr())
+            if self.rethrowsNotShown:
+                print(self.rethrowsNotShownStr)
+                print()
+            else:
+                print()
+        else:
+            print("Siteswap empty")
 
 
 
