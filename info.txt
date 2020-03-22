@@ -1,0 +1,24 @@
+COMMANDS:
+'s'      : save siteswap to text file (existing or new)
+'l'      : load siteswap from text file
+'jlab'   : display notation used for JugglingLab notation
+'a'      : animate in default browser using Juggling Lab
+'p'      : print siteswap
+'sr'     : shift right and print
+'sl'     : shift left and print
+'states' : print all states
+'state'  : select index of state to print
+
+"!" suffix on input term removes next implicit null beat
+"*" suffix on input pattern appends hands-exchanged repeat to pattern
+"R"/"L" prefix on input throw specifies which hand makes this throws
+    (reverts back to alternating hands afterwards if vanilla)
+
+Parser accepts most valid Juggling Lab siteswap notation (solo only).
+Parser assumes implicit null beat after each sync term if no "-" values present.
+Parser attempts to fill structure exactly as written.
+
+Validator checks and possibly corrects pattern.
+If siteswap invalid, validator tries symmetric form before giving up.
+    (This means you can either enter "(6x,4)" or "(6x,4)*")
+Odd lengthed vanilla siteswaps are made symmetric before validation.

@@ -13,8 +13,6 @@ class StateGenerator(object):
         self.state = StateNode()
         self.validator.validate(self.pattern)
 
-
-
         if self.pattern.isEmpty() or not self.pattern.isValid():
             return
 
@@ -43,22 +41,12 @@ class StateGenerator(object):
             if index == len(self.pattern):
                 break
 
+        # Deep copy state structure to each term
         index = 0
         while index < len(self.pattern):
             self.pattern.state = deepcopy(self.state)
             self.throwThis()
             index += 1
-
-        '''
-        while True:
-            self.throwThis()
-
-            index += 1
-            if index == len(self.pattern):
-                break
-        '''
-
-        # Go through whole pattern and add deepcopy of state to each term
 
     def throwThis(self):
         self.state

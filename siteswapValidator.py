@@ -102,18 +102,18 @@ class SiteswapValidator(object):
                 break
 
             # Value in MHN, value in rethrow, value not in invalid rethrow, rethrow full
-            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow == None and term.isRethrowFull(hand):
+            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow == None and self.isRethrowFull(term, hand):
                 throw.invalidRethrow = value
                 throw.invalidRethrowX = addX
                 break
 
             # Value in MHN, value in rethrow, value not in invalid rethrow, rethrow not full
-            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow == None and not term.isRethrowFull(hand):
+            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow == None and not self.isRethrowFull(term, hand):
                 throw = throw.next
                 continue
 
             # Value in MHN, value in rethrow, value in invalid rethrow, rethrow full, invalid full
-            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow != None and term.isRethrowFull(hand) and term.isInvalidFull(hand):
+            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow != None and self.isRethrowFull(term, hand) and self.isInvalidFull(term, hand):
                 if self.pattern.rethrowsNotShown == False:
                     self.pattern.rethrowsNotShownStr += "Some invalid throws not shown: "
                     self.pattern.rethrowsNotShown = True
@@ -124,7 +124,7 @@ class SiteswapValidator(object):
                 break
 
             # Value in MHN, value in rethrow, value in invalid rethrow, rethrow full, invalid not full
-            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow != None and term.isRethrowFull(hand) and not term.isInvalidFull(hand):
+            elif throw.throw != None and throw.rethrow != None and throw.invalidRethrow != None and self.isRethrowFull(term, hand) and not self.isInvalidFull(term, hand):
                 throw = throw.next
                 continue
 
@@ -155,11 +155,12 @@ class SiteswapValidator(object):
                 break
             throw = throw.next
     
-    def isRethrowFull(self, hand):
+    # This method is in Siteswap and SiteswapValidator - pick one
+    def isRethrowFull(self, term, hand):
         if hand == 'l':
-            probe = self.pattern.left
+            probe = term.left
         else: 
-            probe = self.pattern.right
+            probe = term.right
 
         while probe != None:
             if probe.rethrow == None:
@@ -167,11 +168,11 @@ class SiteswapValidator(object):
             probe = probe.next
         return True
 
-    def isInvalidFull(self, hand):
+    def isInvalidFull(self, term, hand):
         if hand == 'l':
-            probe = self.pattern.left
+            probe = term.left
         else: 
-            probe = self.pattern.right
+            probe = term.right
 
         while probe != None:
             if probe.invalidRethrow == None:

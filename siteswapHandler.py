@@ -73,3 +73,30 @@ class SiteswapHandler(object):
 
     def generateStates(self, siteswap):
         self.stateGenerator.generate(siteswap)
+
+    def getVanillaFirstHand(self, siteswap): 
+        index = 0
+        length = len(siteswap)
+
+        while index < length:
+            if siteswap.left.isNull() and not siteswap.right.isNull():
+                return 'r'
+            elif siteswap.right.isNull() and not siteswap.left.isNull():
+                return 'l'
+            siteswap = siteswap.next 
+            index += 1
+        return 'r'
+
+    def getVanillaFirstIndex(self, siteswap):
+        index = 0
+        length = len(siteswap)
+
+        while index < length:
+            if siteswap.left.isNull() and siteswap.right.isNull():
+                siteswap = siteswap.next 
+                index += 1
+            else:
+                return index
+
+
+        return 0

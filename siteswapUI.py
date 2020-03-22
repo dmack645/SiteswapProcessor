@@ -40,9 +40,16 @@ select state and generate possible transitions into/out of pattern (select perio
 
 Fix parser to not allow 0 in multiplex throw(as first [012] or otherwise [12303])
 strip user input of lagging whitespace
+
+Right now, the parser adds an implied null beat whenever '-' is not in term
+When entering an MHN, this causes problems when there isn't a null throw in a term.
+I think this is ok for now unless I come up with something better. Just use "!"" when needed
+
+There should be a showDiagnostics mode. Additional information printed, such as whether the validator converted it to symmetric
+mhn mode: everything is in mhn. No simplified display of state or siteswap
 """
 
-class SiteswapTool(object):
+class SiteswapUI(object):
     jugglingArt = 6 
     def __init__(self):
         self.rawSiteswap = ''
@@ -77,7 +84,7 @@ class SiteswapTool(object):
                 self.pickState()
 
             elif userString == 'a':
-                jLab = self.siteswap.getJlabString()
+                jLab = self.getJlabString(self.siteswap)
                 url = "https://jugglinglab.org/anim?pattern=" + jLab
                 #url += ";gravity=2500.0;bps=6.5"
                 webbrowser.open_new_tab(url)
@@ -85,7 +92,7 @@ class SiteswapTool(object):
                 print("Siteswap string: " + jLab + '\n')
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
-                print('\n' + self.siteswap.getJlabString() + '\n')
+                print('\n' + self.getJlabString(self.siteswap) + '\n')
             else:
                 if self.handler.parseString(userString, quiet = False) != False:
                     self.rawSiteswap = userString
@@ -106,15 +113,24 @@ class SiteswapTool(object):
             return
 
         self.handler.generateStates(self.siteswap)
-        print("Siteswap: " + self.siteswap.getSimpleString())
+        print("Siteswap: " + self.getSimpleString(self.siteswap))
         print()
         print("States:")
-        maxLength = self.siteswap.getMaxStateLength()
+        maxLength = self.siteswap.getMax()
 
+        # Vanilla
         if self.siteswap.isVanilla():
-            hand = self.siteswap.getVanillaFirstHand()
-            foundValue = False
-            index = 0
+            hand = self.handler.getVanillaFirstHand(self.siteswap)
+            index = self.handler.getVanillaFirstIndex(self.siteswap)
+
+            # Get first hand 
+            while index != 0:
+                if hand == 'r':
+                    hand = 'l'
+                elif hand == 'l':
+                    hand = 'r'
+                index -= 1
+
             if not self.siteswap.isSymmetric():
                 length = len(self.siteswap)
             else: 
@@ -129,20 +145,13 @@ class SiteswapTool(object):
 
                 if hand == 'r':
                     print(probe.right.getSimpleString())
-                    if not probe.right.isNull() and not foundValue:
-                        foundValue = True
-                    if foundValue:
-                        hand = 'l'
+                    hand = 'l'
                 else:
                     print(probe.left.getSimpleString())
-                    if not probe.left.isNull() and not foundValue:
-                        foundValue = True
-                    if foundValue:
-                        hand = 'r'
+                    hand = 'r'
 
                 probe = probe.next
-
-                index +=1
+                index += 1
                 print()
 
         else:
@@ -182,7 +191,7 @@ class SiteswapTool(object):
             print('*', end = '')
 
     def printWelcome(self):
-        if SiteswapTool.jugglingArt != 6:
+        if SiteswapUI.jugglingArt != 6:
             self.printHeader()
             print('{:^{}}'.format("SITESWAP IS FUN!", get_terminal_size()[0]))
             self.printHeader()
@@ -308,18 +317,31 @@ class SiteswapTool(object):
                 continue
             elif int(index) in range(0, len(self.siteswap)):
                 probe = self.siteswap.getTerm(int(index))
+
                 string = ""
                 if self.siteswap.isVanilla():
                     string = self.getVanillaStateString(probe)
                 else:
                     string = str(probe.state)
                 print()
-                print('{:15}{}'.format("Siteswap:", probe.getSimpleString()))
+                print('{:15}{}'.format("Siteswap:", self.getSimpleString(probe)))
                 print('{:15}{}'.format("Current State:", string)) 
-                ''' 
-                print("\nSiteswap: "+ probe.getSimpleString())
-                print("Current State: " + string)
+
                 '''
+                temp = self.siteswap
+                self.siteswap = self.siteswap.getTerm(int(index))
+
+                string = ""
+                if self.siteswap.isVanilla():
+                    string = self.getVanillaStateString(self.siteswap)
+                else:
+                    string = str(self.siteswap.state)
+                print()
+                print('{:15}{}'.format("Siteswap:", self.getSimpleString()))
+                print('{:15}{}'.format("Current State:", string)) 
+                self.siteswap = temp
+                '''
+
 
             else:
                 print("\nInvalid input.")
@@ -328,40 +350,96 @@ class SiteswapTool(object):
         for index in dictionary:
             print('{:4}{}'.format(str(index)+ ":", str(dictionary[index])))
 
+    def getSimpleString(self, siteswap):
+        """Returns a string representation of the structure in MHN format"""
+
+
+        if siteswap.isVanilla():
+            return self.getJlabString(siteswap)
+        else:
+            string = ""
+
+            index = 0
+            probe = siteswap
+            while index < len(siteswap):
+                string += ("(%s,%s)" % (probe.left.getSimpleString(), probe.right.getSimpleString()))
+                probe = probe.next
+                index += 1
+            return string
+
+    def getJlabString(self, siteswap):
+        """Returns a string representation of the structure in JLAB format"""
+        string = ""
+        index = 0
+
+
+        if not siteswap.isVanilla():
+            for term in siteswap:   # REVISE THIS TO USE PROBE~~~~~~~~~~~~
+                if term.left.getSimpleString() == '-':
+                    left = '0'
+                else:
+                    left = term.left.getSimpleString()
+                if term.right.getSimpleString() == '-':
+                    right = '0'
+                else:
+                    right = term.right.getSimpleString()
+                string += ("(%s,%s)!" % (left, right))
+            return string
+
+        else:   # if vanilla 
+            hand = self.handler.getVanillaFirstHand(siteswap)
+            firstIndex = self.handler.getVanillaFirstIndex(siteswap)
+
+
+            # get first term hand 
+            while firstIndex != 0:
+                firstIndex -= 1
+                if hand == 'r':
+                    hand = 'l'
+                else:
+                    hand = 'r'
+
+            if siteswap.symmetric: # SHOULDN'T NEED .SYMMETRIC. JUST ISSYMMETRIC IN HANDLER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                patternLength = len(siteswap) // 2
+            else:
+                patternLength = len(siteswap)
+
+            probe = siteswap
+            while index < patternLength:
+                if hand == 'r':
+                    if str(probe.right) == '-':
+                        value = '0'
+                    else:
+                        value = str(probe.right)
+                    string += value
+                    hand = 'l'
+                else:
+                    if str(probe.left) == '-':
+                        value = '0'
+                    else:
+                        value = str(probe.left)
+                    string += value
+                    hand = 'r'
+                index += 1
+                probe = probe.next
+            return string
+
     def printInfo(self):
-        self.printHeader()
+        try:
+            file = open("info.txt", 'r')
+        except:
+            print("\nCould not open or find info.txt\n")
+            return
         print()
-        info = \
-"""
-COMMANDS:
-'s'      : save siteswap to text file (existing or new)
-'l'      : load siteswap from text file
-'jlab'   : display notation used for JugglingLab notation
-'a'      : animate in default browser using Juggling Lab
-'p'      : print siteswap
-'sr'     : shift right and print
-'sl'     : shift left and print
-'states' : print all states
-'state'  : select index of state to print
+        self.printHeader()
+        print('\n')
+        for line in file:
+            print(line, end = '')
+        print()
 
-"!" suffix on input term removes next implicit null beat
-"*" suffix on input pattern appends hands-exchanged repeat to pattern
-"R"/"L" prefix on input throw specifies which hand makes this throws
-    (reverts back to alternating hands afterwards if vanilla)
-
-Parser accepts most valid Juggling Lab siteswap notation (solo only).
-Parser assumes implicit null beat after each sync term if no "-" values present.
-Parser attempts to fill structure exactly as written.
-
-Validator checks and possibly corrects pattern.
-If siteswap invalid, validator tries symmetric form before giving up.
-    (This means you can either enter "(6x,4)" or "(6x,4)*")
-Odd lengthed vanilla siteswaps are made symmetric before validation.
-"""
-        print(info)
 
 def main():
-    generator = SiteswapTool()
+    generator = SiteswapUI()
     generator.run()
 
 if __name__ == "__main__": main()

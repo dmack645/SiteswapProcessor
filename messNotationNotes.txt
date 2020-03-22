@@ -1,0 +1,38 @@
+6 BEAT FAMILY
+
+Messes
+
+Mess, Inside, "Top"-Xside-"bottom" :  (4)(28).(-4)(28).(4)(-28).    "Flipped Sebs"
+Mess, Inside, "Bottom"-Xside-"top":   (4)(28).(-4)(28).(4)(-28).    "Sebs"
+Mess, Inside, Xtop-side-Xbottom:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Flipped Mills"
+Mess, Inside, Xbottom-side-Xtop:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Mills"
+
+Mess, Outside, "Top"-Xside-"bottom" : (28)(4).(28)(-4).(-28)(4).    "Flipped Flos"
+Mess, Outside, "Bottom"-Xside-"top":  (28)(4).(28)(-4).(-28)(4).    "Flos Mess"
+Mess, outside, Xtop-side-Xbottom:     (-28)(-4).(28)(-4).(-28)(4).  "Mills Mess"
+Mess, outside, Xbottom-side-Xtop:     (-28)(-4).(28)(-4).(-28)(4).  "Flipped Mills"
+
+He said flipped flos is time reversed sebs
+In short words: the flos/sebs/analog/inverted family, whatever we call it, is two uncrossed throws 
+and one crossed throw OR two native throws and one non-native.
+While the mills family is two crossed, one uncrossed.
+
+I need to clarify that this is all for siteswap 3
+For siteswap 3, the catching coordinate of a given beat determines the direction of the throw made one beat before it
+For siteswap 4, this coordinate determines the direction of the throw made 2 beats before it. 
+His 4 ball sebs looks different than his 3 ball sebs. 
+
+CORRECTED FOR 4 BALL: (Wrong?)
+Mess, outside, Xtop-side-Xbottom:     (-28)(4).(28)(-4).(-28)(-4).  "Mills Mess"
+
+Mess, Inside, "Top"-Xside-"bottom" :  (4)(28).(-4)(28).(4)(-28).    "Flipped Sebs"
+Mess, Inside, "Bottom"-Xside-"top":   (4)(28).(-4)(-28).(4)(-28).    "Sebs" I don't think this is right
+Mess, Inside, Xtop-side-Xbottom:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Flipped Mills"
+Mess, Inside, Xbottom-side-Xtop:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Mills"
+
+Mess, Outside, "Top"-Xside-"bottom" : (28)(4).(28)(-4).(-28)(4).    "Flipped Flos"
+Mess, Outside, "Bottom"-Xside-"top":  (28)(4).(28)(-4).(-28)(4).    "Flos Mess"
+Mess, outside, Xtop-side-Xbottom:     (-28)(-4).(28)(4).(-28)(4).  "Mills Mess"
+Mess, outside, Xbottom-side-Xtop:     (-28)(-4).(28)(4).(-28)(4).  "Flipped Mills"
+
+I think I learned time reversed mess wrong
