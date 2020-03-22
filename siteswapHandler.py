@@ -67,8 +67,11 @@ class SiteswapHandler(object):
             return {i + 1 : siteswapList[i].rstrip() for i in range(0, len(siteswapList))}
 
     def writeStrToFile(self, string, fileName):
+        if os.path.exists(fileName):
+            string = '\n' + string
+
         file = open(fileName, 'a+')
-        file.write(string + '\n')
+        file.write(string)
         file.close()
 
     def generateStates(self, siteswap):

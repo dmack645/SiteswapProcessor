@@ -291,7 +291,7 @@ class SiteswapUI(object):
             return
         #fileName = fileName.strip() + ".txt"
         fileName += ".txt"
-        self.handler.writeStrToFile(str(self.rawSiteswap) + '\n', fileName)
+        self.handler.writeStrToFile(str(self.rawSiteswap), fileName)
         print("Siteswap saved in " + fileName + '\n')
             
     def pickState(self):
