@@ -167,27 +167,36 @@ class Siteswap(object):
 
     def isSimpleSync(self):
         if self.isEmpty(): return True
+        if len(self) % 2 != 0:
+            return False
 
-        throwBeat = False
+        throwBeat = True
         index = 0
         length = len(self)
         probe = self
+        # Point to first term that isn't null beat
+        while True:
+            if probe.left.throw != None or probe.right.throw != None:
+                break
+            probe = probe.next
 
         while index < length:
-            if probe.left.throw == None and probe.right.throw != None:
-                if hand == 'r':
-                    return False
-                else:
-                    hand = 'r'
-            elif probe.right.throw == None and probe.left.throw != None:
-                if hand == 'l':
-                    return False
-                else:
-                    hand = 'l'
-            elif len(probe.left) >= 1 and len(probe.right) >= 1:
+            if (probe.left.throw == None and probe.right.throw != None) or (probe.left.throw != None and probe.right.throw == None):
                 return False
+            elif probe.right.throw == None and probe.left.throw == None and throwBeat:
+                return False
+            elif probe.right.throw != None and probe.left.throw != None and not throwBeat:
+                return False
+            elif probe.right.throw == None and probe.left.throw == None and not throwBeat:
+                throwBeat = True
+            elif probe.right.throw != None and probe.left.throw != None and throwBeat: 
+                throwBeat = False  
+            else: 
+                print("Unknown error in isSimpleSync (bug needs to be fixed)")
+                return False             
             probe = probe.next 
             index += 1
+        return True
 
     def isSymmetric(self):
         # Eventually add support for odd period patterns (for weird MHN patterns with symmetric middle term)

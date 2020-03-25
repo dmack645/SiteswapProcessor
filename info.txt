@@ -67,6 +67,8 @@ The 'x' status of each throw changes as well so that each throw maintains its re
 
 
 OTHER NOTES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+0x throws are supported by this app (and JoePass!) but they are unsupported by Juggling Lab.
+
 Parser accepts most valid Juggling Lab siteswap notation (solo only).
 Parser assumes implicit null beat after each sync term if no "-" values present.
 Parser attempts to fill structure exactly as written.

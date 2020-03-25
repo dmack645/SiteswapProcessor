@@ -415,23 +415,9 @@ class SiteswapUI(object):
         index = 0
 
 
-        if not siteswap.isVanilla():
-            for term in siteswap:   # REVISE THIS TO USE PROBE~~~~~~~~~~~~
-                if term.left.getSimpleString() == '-':
-                    left = '0'
-                else:
-                    left = term.left.getSimpleString()
-                if term.right.getSimpleString() == '-':
-                    right = '0'
-                else:
-                    right = term.right.getSimpleString()
-                string += ("(%s,%s)!" % (left, right))
-            return string
-
-        else:   # if vanilla 
+        if siteswap.isVanilla():
             hand = self.handler.getVanillaFirstHand(siteswap)
             firstIndex = self.handler.getVanillaFirstIndex(siteswap)
-
 
             # get first term hand 
             while firstIndex != 0:
@@ -465,6 +451,54 @@ class SiteswapUI(object):
                 index += 1
                 probe = probe.next
             return string
+
+        elif siteswap.isSimpleSync():
+            probe = siteswap
+            # point to first term that isn't a null beat
+            while True:
+                if probe.left.throw != None or probe.right.throw != None:
+                    break
+                probe = probe.next
+
+            throwBeat = True
+            index = 0
+            length = len(siteswap)
+
+            while index < length:
+                if not throwBeat:
+                    probe = probe.next
+                    index += 1
+                    throwBeat = True
+                    continue
+                if probe.left.getSimpleString() == '-':
+                    left = '0'
+                else:
+                    left = probe.left.getSimpleString()
+                if probe.right.getSimpleString() == '-':
+                    right = '0'
+                else:
+                    right = probe.right.getSimpleString()
+                string += ("(%s,%s)" % (left, right))   
+                probe = probe.next
+                index += 1
+                throwBeat = False   
+            return string      
+
+        else:
+            for term in siteswap:   # REVISE THIS TO USE PROBE~~~~~~~~~~~~
+                if term.left.getSimpleString() == '-':
+                    left = '0'
+                else:
+                    left = term.left.getSimpleString()
+                if term.right.getSimpleString() == '-':
+                    right = '0'
+                else:
+                    right = term.right.getSimpleString()
+                string += ("(%s,%s)!" % (left, right))
+            return string
+
+
+
 
     def getRawInputString(self,siteswap):
         """Returns a string representation of the structure in MHN format"""
