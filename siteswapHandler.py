@@ -54,6 +54,7 @@ class SiteswapHandler(object):
         if i >= 1:
             throw1.addThrow(ThrowNode(0, False))
             throw1 = throw1.next
+            throw1Index = len(throw1Head) - 1
 
         i = throw2Index
         while i != 0 and throw2.next != None:
@@ -63,6 +64,7 @@ class SiteswapHandler(object):
         if i >= 1:
             throw2.addThrow(ThrowNode(0, False))
             throw2 = throw2.next
+            throw2Index = len(throw2Head) - 1
         
 
         # Get throw values, throwX, and throw parity if not null
@@ -144,7 +146,6 @@ class SiteswapHandler(object):
             if quiet == False:
                 print("Error:")
                 print(e)
-            tempSiteswap.delete()
             return False 
         return tempSiteswap
 

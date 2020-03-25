@@ -193,7 +193,7 @@ class SiteswapValidator(object):
         If validation fails on the first pass, make the siteswap symmetric and try again.
         """
         # Option to print invalid siteswap/rethrow lines before trying symmetric version
-        print("TRIED SYMMETRIC~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        #print("TRIED SYMMETRIC~~~~~~~~~~~~~~~~~~~~~~~~~~")
         if Siteswap.showInvalidFirstPass:
             self.pattern.setValidity(False)
             self.pattern.printSiteswap()

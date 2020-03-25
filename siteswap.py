@@ -137,6 +137,148 @@ class Siteswap(object):
         return True
         """
 
+    def isVanilla(self):
+        """Returns True if async vanilla siteswap"""
+        # Check for empty siteswap
+        if self.isEmpty(): return True
+
+        hand = None
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe.left.throw == None and probe.right.throw != None:
+                if hand == 'r':
+                    return False
+                else:
+                    hand = 'r'
+            elif probe.right.throw == None and probe.left.throw != None:
+                if hand == 'l':
+                    return False
+                else:
+                    hand = 'l'
+            elif len(probe.left) >= 1 and len(probe.right) >= 1:
+                return False
+            probe = probe.next 
+            index += 1
+
+        return True
+
+    def isSimpleSync(self):
+        if self.isEmpty(): return True
+
+        throwBeat = False
+        index = 0
+        length = len(self)
+        probe = self
+
+        while index < length:
+            if probe.left.throw == None and probe.right.throw != None:
+                if hand == 'r':
+                    return False
+                else:
+                    hand = 'r'
+            elif probe.right.throw == None and probe.left.throw != None:
+                if hand == 'l':
+                    return False
+                else:
+                    hand = 'l'
+            elif len(probe.left) >= 1 and len(probe.right) >= 1:
+                return False
+            probe = probe.next 
+            index += 1
+
+    def isSymmetric(self):
+        # Eventually add support for odd period patterns (for weird MHN patterns with symmetric middle term)
+        length = len(self)
+
+        if length % 2 != 0:
+            return False
+
+        outerIndex = 0
+
+        laggingProbe = self
+        leadingProbe = self.getTerm(length//2) # Points to first term in second half
+
+        # Search for node at the last position
+        # leadingProbe points to end, laggingProbe follows from beginning
+        while outerIndex < (length//2):
+            if (not laggingProbe.left.isEqual(leadingProbe.right) or (not laggingProbe.right.isEqual(leadingProbe.left))):
+                innerIndex = 0
+                while innerIndex < length:
+                    leadingProbe.symmetric = False
+                    leadingProbe = leadingProbe.next
+                    innerIndex += 1
+                return False
+
+            else:
+                leadingProbe.symmetric = True
+                laggingProbe.symmetric = True
+                leadingProbe = leadingProbe.next
+                laggingProbe = laggingProbe.next
+                outerIndex += 1
+        return True
+
+    def isEmpty(self): # Eventually make Siteswap initialize circularly (not null terminated)
+        """
+        Returns True if throw values are null and there is no next term 
+        Otherwise, return False
+        """
+        # Recall: throwNode.isEmpty returns true if self.throw == None, returns False if self.throw == 0
+        if self.left.isEmpty() and self.right.isEmpty() and self.next == None:
+            return True
+        else: return False
+
+    def makeSymmetric(self):
+        """
+        Adds on a second half that mirrors the first half (hands switched)
+
+        Precondition: self must point to the header node of a structure
+        """
+        self.clearRethrowValues()
+        length = len(self)
+        i = 0
+
+        probe = self
+
+        # Search for node at the last position
+        # leadingProbe points to end, laggingProbe follows from beginning
+        while i < length:
+            term = Siteswap(ThrowNode(), ThrowNode(), next = self) # don't think I need to point next to pattern
+            term.symmetric = True
+            # Add throws from laggingProbe to leadingProbe (swap handedness)
+            for node in probe.left:
+                right = ThrowNode(node.throw, node.throwX, None)
+                term.right.addThrow(right)
+
+            for node in probe.right:
+                left = ThrowNode(node.throw, node.throwX, None)
+                term.left.addThrow(left)
+            self.addTerm(term)
+            probe.symmetric = True
+            probe = probe.next
+            i += 1
+
+    def makeAsymmetric(self):
+        """
+        Throws out second half of pattern.
+
+        Precondition: length of structure must be even
+        """
+        self.clearRethrowValues()
+        if len(self) % 2 == 0 and len(self) >= 2:
+            i = int((len(self) / 2) - 1)  # index of last term in first half
+            probe = self
+
+            # Find last term in first half of structure
+            for term in range (0, i):
+                probe.symmetric = False
+                probe = probe.next
+
+            # Link this probe to self, removing second half from structure
+            probe.next = self
+
     def clearRethrowValues(self):
         """
         Traverses structure and sets self.rightCheck and self.leftCheck to None 
@@ -206,86 +348,6 @@ class Siteswap(object):
             probe = probe.next 
             index += 1
 
-    def isSymmetric(self):
-        # Eventually add support for odd period patterns (for weird MHN patterns with symmetric middle term)
-        length = len(self)
-
-        if length % 2 != 0:
-            return False
-
-        outerIndex = 0
-
-        laggingProbe = self
-        leadingProbe = self.getTerm(length//2) # Points to first term in second half
-
-        # Search for node at the last position
-        # leadingProbe points to end, laggingProbe follows from beginning
-        while outerIndex < (length//2):
-            if (not laggingProbe.left.isEqual(leadingProbe.right) or (not laggingProbe.right.isEqual(leadingProbe.left))):
-                innerIndex = 0
-                while innerIndex < length:
-                    leadingProbe.symmetric = False
-                    leadingProbe = leadingProbe.next
-                    innerIndex += 1
-                return False
-
-            else:
-                leadingProbe.symmetric = True
-                laggingProbe.symmetric = True
-                leadingProbe = leadingProbe.next
-                laggingProbe = laggingProbe.next
-                outerIndex += 1
-        return True
-
-    def makeSymmetric(self):
-        """
-        Adds on a second half that mirrors the first half (hands switched)
-
-        Precondition: self must point to the header node of a structure
-        """
-        self.clearRethrowValues()
-        length = len(self)
-        i = 0
-
-        probe = self
-
-        # Search for node at the last position
-        # leadingProbe points to end, laggingProbe follows from beginning
-        while i < length:
-            term = Siteswap(ThrowNode(), ThrowNode(), next = self) # don't think I need to point next to pattern
-            term.symmetric = True
-            # Add throws from laggingProbe to leadingProbe (swap handedness)
-            for node in probe.left:
-                right = ThrowNode(node.throw, node.throwX, None)
-                term.right.addThrow(right)
-
-            for node in probe.right:
-                left = ThrowNode(node.throw, node.throwX, None)
-                term.left.addThrow(left)
-            self.addTerm(term)
-            probe.symmetric = True
-            probe = probe.next
-            i += 1
-
-    def makeAsymmetric(self):
-        """
-        Throws out second half of pattern.
-
-        Precondition: length of structure must be even
-        """
-        self.clearRethrowValues()
-        if len(self) % 2 == 0 and len(self) >= 2:
-            i = int((len(self) / 2) - 1)  # index of last term in first half
-            probe = self
-
-            # Find last term in first half of structure
-            for term in range (0, i):
-                probe.symmetric = False
-                probe = probe.next
-
-            # Link this probe to self, removing second half from structure
-            probe.next = self
-
     def getNumberProps(self):
         """Returns the number of props being juggled"""
         if len(self) != 0:
@@ -353,33 +415,11 @@ class Siteswap(object):
         else:
             return False
 
-    def isVanilla(self):
-        """Returns True if async vanilla siteswap"""
-        # Check for empty siteswap
-        if self.isEmpty(): return True
-
-        hand = None
-        index = 0
-        length = len(self)
-        probe = self
-
-        while index < length:
-            if probe.left.throw == None and probe.right.throw != None:
-                if hand == 'r':
-                    return False
-                else:
-                    hand = 'r'
-            elif probe.right.throw == None and probe.left.throw != None:
-                if hand == 'l':
-                    return False
-                else:
-                    hand = 'l'
-            elif len(probe.left) >= 1 and len(probe.right) >= 1:
-                return False
-            probe = probe.next 
-            index += 1
-
-        return True
+    def delete(self):
+        """Deletes content of structure - only one empty node remains"""
+        self.next = None
+        self.left = ThrowNode()
+        self.right = ThrowNode()
 
     def __len__(self):
         """Returns the number of terms in the structure"""
@@ -392,23 +432,6 @@ class Siteswap(object):
             length += 1
             probe = probe.next
         return length + 1
-
-    def isEmpty(self): # Eventually make Siteswap initialize circularly (not null terminated)
-        """
-        Returns True if no throws made this term and there's no next term.
-        Otherwise, return False
-        """
-
-        # Recall: throwNode.isEmpty returns true if self.throw == None, returns False if self.throw == 0
-        if self.left.isEmpty() and self.right.isEmpty() and self.next == None:
-            return True
-        else: return False
-
-    def delete(self):
-        """Deletes content of structure - only one empty node remains"""
-        self.next = None
-        self.left = ThrowNode()
-        self.right = ThrowNode()
 
     def __iter__(self): 
         """"Returns iterable object. Allows for 'for' loops and iter()"""
@@ -438,8 +461,6 @@ class Siteswap(object):
         for node in self:
             string += ("(%s,%s)" % (str(node.left), str(node.right)))
         return string
-
-
 
     # This and its dependencies should be in siteswapUI or siteswapHandler
     # This isn't important for right now - doesn't make things harder by being here.
