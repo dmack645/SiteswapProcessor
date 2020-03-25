@@ -22,6 +22,7 @@ class SiteswapValidator(object):
         else:
             self.tryAgainSymmetric()
 
+
         return self.pattern.isValid()
 
     def fillRethrowLine(self):
@@ -31,7 +32,11 @@ class SiteswapValidator(object):
                                    # were remaining in rethrow fields
 
         # Outer loop traverses structure
-        for outerProbe in self.pattern:
+        outerProbe = self.pattern
+        length = len(self.pattern)
+        index = 0
+
+        while index < length:
             # Left hand throwing site
             if not outerProbe.left.isEmpty(): 
                 # Find/fill rethrow site for each throw at this site (>1 if multiplex)
@@ -88,6 +93,9 @@ class SiteswapValidator(object):
                     else:   
                         self.insertRethrowAndCheck(value, addX, innerProbe, innerProbe.left, 'l')
                     node = node.next
+
+            outerProbe = outerProbe.next
+            index += 1
         
     def insertRethrowAndCheck(self, value, addX, term, throw, hand):
         """Insert value/addX in rethrow/rethrowX fields of node if possible"""
@@ -185,6 +193,7 @@ class SiteswapValidator(object):
         If validation fails on the first pass, make the siteswap symmetric and try again.
         """
         # Option to print invalid siteswap/rethrow lines before trying symmetric version
+        print("TRIED SYMMETRIC~~~~~~~~~~~~~~~~~~~~~~~~~~")
         if Siteswap.showInvalidFirstPass:
             self.pattern.setValidity(False)
             self.pattern.printSiteswap()

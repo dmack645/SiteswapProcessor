@@ -17,7 +17,8 @@ Description:   This module defines a class SiteswapValidator. Objects of
                is valid, along with the MHN and checking line. 
 Notes should go here   
 ***************************************************************************
-EDIT
+
+Scan computer for JugglingLab.exe and use that instead of browser if exists
 """ 
 
 from siteswapParser import Parser
@@ -28,6 +29,7 @@ import webbrowser
 from terminalSize import get_terminal_size
 from asciiArt import getArt
 from siteswapHandler import SiteswapHandler
+import re
 
 """
 TODO
@@ -47,6 +49,24 @@ I think this is ok for now unless I come up with something better. Just use "!""
 
 There should be a showDiagnostics mode. Additional information printed, such as whether the validator converted it to symmetric
 mhn mode: everything is in mhn. No simplified display of state or siteswap
+
+BUG: raw input: (6x,[4 0x])!(-,-)(0,2x)!(-,-)(4x,ax)!(-,-)(2x,4 )!(-,-)
+    swap 0l0 3l0 should yield:  
+    Valid 4-prop siteswap
+    Indices:       (    0    )( 1 )( 2  )( 3  )(  4  )( 5 )( 6  )( 7 )
+    Siteswap:      (3x,[4 0x])(-,-)(0,2x)(3 ,-)(4x,ax)(-,-)(2x,4)(-,-)
+    Rethrow line:  (0x,[4x2x])(-,-)(0,4 )(3x,-)(2x,4 )(-,-)(ax,3)(-,-)
+
+but with raw input (6x,[40x])(0,2x)(4x,ax)(2x,4) I'm getting :
+    Valid 5-prop siteswap
+    Indices:       (    0    )( 1  )( 2  )( 3  )(  4  )( 5  )( 6  )( 7  )
+    Siteswap:      (3x,[4 0x])(3 ,-)(0,2x)(3 ,-)(4x,ax)(3 ,-)(2x,4)(3 ,-)
+    Rethrow line:  (0x,[4x3 ])(3x,-)(0,4 )(3x,-)(2x,4 )(3x,-)(ax,3)(3x,-)
+
+    It says it's valid but it is not. The validator appears to be working fine.
+    The issue might be with how the parser accounts for implicit null beats.
+    Solved:
+    There's an issue with default parameters of the Siteswap constructor. Must manually construct/pass null throwNode objects
 """
 
 class SiteswapUI(object):
@@ -56,6 +76,7 @@ class SiteswapUI(object):
         self.printWelcome()
 
         self.siteswap = Siteswap()          # Empty siteswap
+        self.dwell = 1.3
 
     def run(self):
         self.handler = SiteswapHandler()
@@ -73,6 +94,8 @@ class SiteswapUI(object):
                 self.saveSiteswap()
             elif userString == 'p':
                 self.siteswap.printSiteswap()
+            elif userString == 'ps':
+                print(self.getSimpleString(self.siteswap, True) + '\n')
             elif userString == 'sr' or userString == 'sl':
                 self.siteswap = self.handler.shift(self.siteswap, userString)
                 self.siteswap.printSiteswap()
@@ -93,6 +116,25 @@ class SiteswapUI(object):
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
                 print('\n' + self.getJlabString(self.siteswap) + '\n')
+            elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
+                swapRE = re.search(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString)
+                term1 = int(swapRE.group(1))
+                hand1 = swapRE.group(2).lower()
+                throw1 = int(swapRE.group(3))
+                term2 = int(swapRE.group(4))
+                hand2 = swapRE.group(5).lower()
+                throw2 = int(swapRE.group(6))
+
+                if (not term1 < len(self.siteswap)) or (not term2 < len(self.siteswap)): 
+                    print("One or more of the term indices provided is out of range.\n")
+                    self.printHeader()
+                    continue
+
+                #print(term1, hand1, throw1, term2, hand2, throw2)
+
+                self.siteswap = self.handler.swap(self.siteswap, term1, hand1, throw1, term2, hand2, throw2)
+                self.siteswap.printSiteswap()
+                self.rawSiteswap = self.getRawInputString(self.siteswap)
             else:
                 if self.handler.parseString(userString, quiet = False) != False:
                     self.rawSiteswap = userString
@@ -350,11 +392,11 @@ class SiteswapUI(object):
         for index in dictionary:
             print('{:4}{}'.format(str(index)+ ":", str(dictionary[index])))
 
-    def getSimpleString(self, siteswap):
+    def getSimpleString(self, siteswap, mhn = False):
         """Returns a string representation of the structure in MHN format"""
 
 
-        if siteswap.isVanilla():
+        if siteswap.isVanilla() and not mhn:
             return self.getJlabString(siteswap)
         else:
             string = ""
@@ -422,6 +464,21 @@ class SiteswapUI(object):
                     hand = 'r'
                 index += 1
                 probe = probe.next
+            return string
+
+    def getRawInputString(self,siteswap):
+        """Returns a string representation of the structure in MHN format"""
+        if siteswap.isVanilla():
+            return self.getJlabString(siteswap)
+        else:
+            string = ""
+
+            index = 0
+            probe = siteswap
+            while index < len(siteswap):
+                string += ("(%s,%s)!" % (probe.left.getSimpleString(), probe.right.getSimpleString()))
+                probe = probe.next
+                index += 1
             return string
 
     def printInfo(self):

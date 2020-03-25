@@ -83,39 +83,82 @@ class Siteswap(object):
 
         while index < length:
             if probe is term:
-                return probe.index
-            probe = probe.next
-        return -1
-    
-    def getMax(self): 
-        """
-        Returns the max value/state length
-        """
-        if self.state == None:
-            return 0
-
-        probe = self
-        maxValue = 0
-        index = 0
-
-        # Find state length for each position in pattern
-        while index < len(self): 
-            throwProbe = probe.left
-            while throwProbe != None:
-                if throwProbe.throw != None:
-                    maxValue = max(throwProbe.throw, maxValue)
-                throwProbe = throwProbe.next
-
-            throwProbe = probe.right
-            while throwProbe != None:
-                if throwProbe.throw != None:
-                    maxValue = max(throwProbe.throw, maxValue)
-                throwProbe = throwProbe.next 
-                
+                return index
             probe = probe.next
             index += 1
+        return -1
 
-        return maxValue
+    def isValid(self):
+        term = self
+        patternLength = len(self)
+        termIndex = 0
+
+        while termIndex < patternLength:
+            throwLength = len(term.right)
+            throw = term.right
+            throwIndex = 0
+
+            while throwIndex < throwLength:
+                if throw.throw == None and throw.rethrow != None:
+                    return False
+                if throw.throw != None and throw.rethrow == None:
+                    return False
+                throw = throw.next
+                throwIndex += 1
+
+            throwLength = len(term.left)
+            throw = term.left
+            throwIndex = 0
+
+            while throwIndex < throwLength:
+                if throw.throw == None and throw.rethrow != None:
+                    return False
+                if throw.throw != None and throw.rethrow == None:
+                    return False
+                throw = throw.next
+                throwIndex += 1
+
+            term = term.next
+            termIndex += 1
+        return True
+
+        """
+        for term in self:
+            for throw in term.right:
+                if throw.throw == None and throw.rethrow != None:
+                    return False
+                if throw.throw != None and throw.rethrow == None:
+                    return False
+            for throw in term.left:
+                if throw.throw == None and throw.rethrow != None:
+                    return False
+                if throw.throw != None and throw.rethrow == None:
+                    return False
+        return True
+        """
+
+    def clearRethrowValues(self):
+        """
+        Traverses structure and sets self.rightCheck and self.leftCheck to None 
+        for all terms.
+        """
+
+        for node in self:
+            node.left.clearRethrowValues()
+            node.right.clearRethrowValues()
+            node.rethrowsNotShown = False
+            node.rethrowsNotShownStr = ""
+
+            #node.valid = True     # filled by setValidity
+            node.errorString = "" # filled by  
+            node.symmetric = False
+            node.modified = False
+
+            node.rethrowsNotShown = False
+            node.rethrowsNotShownStr = ""
+
+            node.index = None
+            node.state = None
 
     def setIndices(self): # This is clunky. Shouldn't need self.index
         """Sets Siteswap self.index and ThrowNode self.index fields for the sitewap relative to self"""
@@ -162,20 +205,6 @@ class Siteswap(object):
             probe.valid = validity   # Set validity
             probe = probe.next 
             index += 1
-
-    def isValid(self):
-        for term in self:
-            for throw in term.right:
-                if throw.throw == None and throw.rethrow != None:
-                    return False
-                if throw.throw != None and throw.rethrow == None:
-                    return False
-            for throw in term.left:
-                if throw.throw == None and throw.rethrow != None:
-                    return False
-                if throw.throw != None and throw.rethrow == None:
-                    return False
-        return True
 
     def isSymmetric(self):
         # Eventually add support for odd period patterns (for weird MHN patterns with symmetric middle term)
@@ -275,17 +304,35 @@ class Siteswap(object):
             return numProps
         else: return 0
 
-    def clearRethrowValues(self):
+    def getMax(self): 
         """
-        Traverses structure and sets self.rightCheck and self.leftCheck to None 
-        for all terms.
+        Returns the max value/state length
         """
+        if self.state == None:
+            return 0
 
-        for node in self:
-            node.left.clearRethrowValues()
-            node.right.clearRethrowValues()
-            node.rethrowsNotShown = False
-            node.rethrowsNotShownStr = ""
+        probe = self
+        maxValue = 0
+        index = 0
+
+        # Find state length for each position in pattern
+        while index < len(self): 
+            throwProbe = probe.left
+            while throwProbe != None:
+                if throwProbe.throw != None:
+                    maxValue = max(throwProbe.throw, maxValue)
+                throwProbe = throwProbe.next
+
+            throwProbe = probe.right
+            while throwProbe != None:
+                if throwProbe.throw != None:
+                    maxValue = max(throwProbe.throw, maxValue)
+                throwProbe = throwProbe.next 
+                
+            probe = probe.next
+            index += 1
+
+        return maxValue
 
     def isLastSync(self):
         """
@@ -352,6 +399,7 @@ class Siteswap(object):
         Otherwise, return False
         """
 
+        # Recall: throwNode.isEmpty returns true if self.throw == None, returns False if self.throw == 0
         if self.left.isEmpty() and self.right.isEmpty() and self.next == None:
             return True
         else: return False
@@ -396,7 +444,7 @@ class Siteswap(object):
     # This and its dependencies should be in siteswapUI or siteswapHandler
     # This isn't important for right now - doesn't make things harder by being here.
     def printSiteswap(self): 
-        if self.valid and not self.isEmpty():
+        if self.isValid() and not self.isEmpty():
             self.setIndices()
             print("\nValid %d-prop siteswap" % self.getNumberProps())
             print("Indices:       " + self.getIndexStr())
@@ -442,10 +490,12 @@ class Siteswap(object):
         string = ""
         tempString = ""
         width = 0
+        index = 0
         for node in self:
             tempString = ("%s,%s" % (str(node.left), str(node.right)))
             width = len(tempString)
-            string += "({:^{}})".format(str(node.index), width)
+            string += "({:^{}})".format(str(index), width)
+            index += 1
         return string
     
 
