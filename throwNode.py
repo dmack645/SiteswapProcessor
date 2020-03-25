@@ -14,6 +14,7 @@ Description:   This module defines a class ThrowNode. This represents a
                to be built into null-terminated singly linked structures.
 ***************************************************************************
 """
+from copy import deepcopy
 
 class ThrowNode(object):
     # Add throw sort method (largest to smallest)
@@ -52,14 +53,90 @@ class ThrowNode(object):
             probe = probe.next
         probe.next = throw
 
+    def insertThrow(self, throw, index):
+        """
+        Insert throw at given index relative to self (should point to head of throw structure)
+        Clear rethrow values of siteswap before calling this 
+        Only inserts one throw at a time (don't pass a linked structure)
+        """
+        # If empty, set first nodes values to that of term's
+        if self.isEmpty() or (self.throw == 0 and self.throwX == False and self.next == None):
+            self.throw = throw.throw
+            self.throwX = throw.throwX
+            self.next = None
+            return
+
+        elif index >= len(self) or index < 0: # check this condtion ~~~~~~~~~~~~~~~~~~~~
+            self.addThrow(throw)
+            return
+        
+        elif index == 0:
+            temp = deepcopy(self)
+            self.throw = throw.throw
+            self.throwX = throw.throwX
+            self.next = temp
+            return
+        
+        else:
+            # Point to specified index in throwNode structure
+            probe = self
+            while index != 0:
+                laggingProbe = probe
+                probe = probe.next
+                index -= 1
+
+            # Insert
+            throw.next = probe
+            laggingProbe.next = throw
+            return
+
+    def deleteThrow(self, index):
+        """
+        Deletes throw at given index relative to self (self should point to head of throw structure)
+        Clear rethrow values of siteswap before calling this 
+        """
+        # If empty, set first nodes values to that of term's
+        if self.isEmpty() or (self.throw == 0 and self.throwX == False and self.next == None) or self.next == None:
+            self.throw = None
+            self.throwX = False
+            self.next = None
+            return
+
+        elif index >= (len(self) -1):
+            probe = self
+            while probe.next.next != None:
+                probe = probe.next
+            probe.next = None
+            return
+
+        
+        elif index == 0:
+            temp = deepcopy(self)
+            self.throw = self.next.throw
+            self.throwX = self.next.throwX
+            self.next = temp.next.next
+            return
+        
+        else:
+            # Point to specified index in throwNode structure
+            probe = self
+            while index != 0:
+                laggingProbe = probe
+                probe = probe.next
+                index -= 1
+
+            # Insert
+            laggingProbe.next = probe.next
+            return
+
     def clearRethrowValues(self):
         """Resets rethrow and rethrowX to None and False for all nodes in this structure"""
-
         for node in self:
             node.rethrow = None
             node.rethrowX = False
             node.invalidRethrow = None
             node.invalidRethrowX = False
+            node.indexStr = None
 
     def getRethrowHand(self, hand):
         """

@@ -66,8 +66,11 @@ class Parser(object):
             if token.getType() == Token.EXCL:
                 self._scanner.next()
                 token = self._scanner.get()
-            elif siteswap.isLastSync():
-                siteswap.addTerm(Siteswap())
+            elif siteswap.isLastSync():            # This is causing a bug
+                nullLH = ThrowNode(None,False,None)
+                nullRH = ThrowNode(None,False,None) # try deepcopy if this doesn't work
+                nullTerm = Siteswap(nullLH, nullRH, None)
+                siteswap.addTerm(nullTerm)
 
             
             if token.getType() == Token.STAR:
