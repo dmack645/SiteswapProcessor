@@ -16,7 +16,8 @@ SITESWAP INPUT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Vanilla siteswap and simplified synchronous siteswap support.
 If a term does not contain a null beat, an implicit null
 beat (-,-) is appended to it. 
-Examples:
+
+Ex:
 "423" -> (-,4)(2,-)(-,3)(4,-)(-,2)(3,-)
 "(6x,4)(4,6x)" -> (6x,4)(-,-)(4,6x)(-,-)
 
@@ -27,28 +28,31 @@ The"R" or "L" prefix on a vanilla input throw specifies which hand makes the thr
     (reverts back to alternating hands afterwards)
 Examples:
 
+
 THE SWAP FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Syntax:
 swap (term1)(hand1)(throw1) (term2)(hand2)(throw2)
 
 Ex:
 swap 4l0 0rl    
-# This swaps term 4's 0th LH throw with term 0's 2nd RH throw
-# Indices for terms and throws start at 0. 
-# first term is swapped to the left, so it wraps around pattern
-# to swap with the throw in the 0th term
+
+This swaps term 4's 0th LH throw with term 0's 2nd RH throw
+Indices for terms and throws start at 0. 
+first term is swapped to the left, so it wraps around pattern
+to swap with the throw in the 0th term
 
 term1/term2 must be a one or two digit integer in range of the pattern indices
 hand1/hand2 must be "r", "R", "l", or "L" 
 throw1/throw2 must be a one or two digit integer in range of the indicated site's indices
     Note: if throw index is out of range, then a throw with value '0' will be added and 
     chosen instead. Zeros can only be chosen as the second throw.
+
 Ex:
 Given: (6x,4)(-,-)(4,2x)(-,-)(4,6x)(-,-)(2x,4)(-,-)
          <-^                  ^->    
 sw 4l0 0r1 -> (6x,[40x])(-,-)(4,2x)(-,-)(4x,6x)(-,-)(2x,4)(-,-)
-# The RH 4 throw in term 4 is swapped to the right with a RH 0 throw added to term 0
 
+The RH 4 throw in term 4 is swapped to the right with a RH 0 throw added to term 0
 
 Purpose:
 Swaps throw at throw1 with throw at throw2 (from left to right - wraps around pattern as needed).
@@ -60,6 +64,7 @@ rethrowing site).
 The first throw value increases as it is moved from right to left (because it's moving away from
 its rethrowing site).
 The 'x' status of each throw changes as well so that each throw maintains its rethrowing site.
+
 
 OTHER NOTES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Parser accepts most valid Juggling Lab siteswap notation (solo only).
