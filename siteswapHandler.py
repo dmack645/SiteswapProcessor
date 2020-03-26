@@ -52,8 +52,10 @@ class SiteswapHandler(object):
             i -= 1
 
         if i >= 1:
-            throw1.addThrow(ThrowNode(0, False))
-            throw1 = throw1.next
+            zeroThrow = ThrowNode(0, False)
+            throw1Head.addThrow(zeroThrow)
+            if len(throw1Head) != 1:
+                throw1 = throw1.next
             throw1Index = len(throw1Head) - 1
 
         i = throw2Index
@@ -62,8 +64,10 @@ class SiteswapHandler(object):
             i -= 1
 
         if i >= 1:
-            throw2.addThrow(ThrowNode(0, False))
-            throw2 = throw2.next
+            zeroThrow = ThrowNode(0, False)
+            throw2Head.addThrow(zeroThrow)
+            if len(throw2Head) != 1:
+                throw2 = throw2.next
             throw2Index = len(throw2Head) - 1
         
 

@@ -29,6 +29,7 @@ import webbrowser
 from terminalSize import get_terminal_size
 from asciiArt import getArt
 from siteswapHandler import SiteswapHandler
+from copy import deepcopy
 import re
 
 """
@@ -75,7 +76,9 @@ class SiteswapUI(object):
         self.rawSiteswap = ''
         self.printWelcome()
 
-        self.siteswap = Siteswap()          # Empty siteswap
+        self.siteswap = Siteswap()     
+        self.previousSiteswaps = list()
+
         self.dwell = 1.3
 
     def run(self):
@@ -86,16 +89,22 @@ class SiteswapUI(object):
             userString = input("Enter siteswap or command: ").strip()
             if userString == '': 
                 break
+
             elif userString == 'i':
                 self.printInfo()
+
             elif userString == 'l':
                 self.chooseSiteswap()
+
             elif userString == 's':
                 self.saveSiteswap()
+
             elif userString == 'p':
                 self.siteswap.printSiteswap()
+
             elif userString == 'ps':
                 print(self.getSimpleString(self.siteswap, True) + '\n')
+
             elif userString == 'sr' or userString == 'sl':
                 self.siteswap = self.handler.shift(self.siteswap, userString)
                 self.siteswap.printSiteswap()
@@ -106,6 +115,13 @@ class SiteswapUI(object):
             elif userString == 'state':
                 self.pickState()
 
+            elif userString == 'ba':
+                if len(self.previousSiteswaps) >= 1:
+                    self.siteswap = self.previousSiteswaps.pop()
+                    self.siteswap.printSiteswap()
+                else:
+                    print("No previous siteswaps to load.\n")
+
             elif userString == 'a':
                 jLab = self.getJlabString(self.siteswap)
                 url = "https://jugglinglab.org/anim?pattern=" + jLab
@@ -113,9 +129,11 @@ class SiteswapUI(object):
                 webbrowser.open_new_tab(url)
                 print("\nAttempting to load Juggling Lab gif in default browser.")
                 print("Siteswap string: " + jLab + '\n')
+
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
                 print('\n' + self.getJlabString(self.siteswap) + '\n')
+
             elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
                 swapRE = re.search(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString)
                 term1 = int(swapRE.group(1))
@@ -124,20 +142,18 @@ class SiteswapUI(object):
                 term2 = int(swapRE.group(4))
                 hand2 = swapRE.group(5).lower()
                 throw2 = int(swapRE.group(6))
-
                 if (not term1 < len(self.siteswap)) or (not term2 < len(self.siteswap)): 
                     print("One or more of the term indices provided is out of range.\n")
                     self.printHeader()
                     continue
-
-                #print(term1, hand1, throw1, term2, hand2, throw2)
-
+                self.previousSiteswaps.append(deepcopy(self.siteswap))
                 self.siteswap = self.handler.swap(self.siteswap, term1, hand1, throw1, term2, hand2, throw2)
                 self.siteswap.printSiteswap()
                 self.rawSiteswap = self.getRawInputString(self.siteswap)
             else:
                 if self.handler.parseString(userString, quiet = False) != False:
                     self.rawSiteswap = userString
+                    self.previousSiteswaps.append(deepcopy(self.siteswap))
                     self.siteswap = self.handler.parseString(userString, quiet = False)
                     self.handler.validate(self.siteswap)
                     self.siteswap.printSiteswap()
@@ -274,8 +290,10 @@ class SiteswapUI(object):
                         return
 
                     elif siteswapIndex.isdigit() and (int(siteswapIndex) - 1) in range(len(siteswapDict)):
+
                         self.rawSiteswap = siteswapDict[int(siteswapIndex)]
                         if self.handler.parseString(self.rawSiteswap, quiet = False) != False:
+                            self.previousSiteswaps.append(deepcopy(self.siteswap))
                             self.siteswap = self.handler.parseString(siteswapDict[int(siteswapIndex)], quiet = True)
                             self.handler.validate(self.siteswap)
                             self.siteswap.printSiteswap()
@@ -496,9 +514,6 @@ class SiteswapUI(object):
                     right = term.right.getSimpleString()
                 string += ("(%s,%s)!" % (left, right))
             return string
-
-
-
 
     def getRawInputString(self,siteswap):
         """Returns a string representation of the structure in MHN format"""
