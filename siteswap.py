@@ -495,7 +495,7 @@ class Siteswap(object):
             else:
                 print()
         else:
-            print("Siteswap empty")
+            print("\nSiteswap empty\n")
 
     def getRethrowStr(self):
         """Returns a string representation of the structure's rethrow values in MHN format"""

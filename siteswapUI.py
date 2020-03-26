@@ -116,11 +116,12 @@ class SiteswapUI(object):
                 self.pickState()
 
             elif userString == 'ba':
-                if len(self.previousSiteswaps) >= 1:
+                if len(self.previousSiteswaps) > 1:
                     self.siteswap = self.previousSiteswaps.pop()
+                    self.rawSiteswap = self.getRawInputString(self.siteswap)
                     self.siteswap.printSiteswap()
                 else:
-                    print("No previous siteswaps to load.\n")
+                    print("\nNo previous siteswaps to load.\n")
 
             elif userString == 'a':
                 jLab = self.getJlabString(self.siteswap)
@@ -150,6 +151,7 @@ class SiteswapUI(object):
                 self.siteswap = self.handler.swap(self.siteswap, term1, hand1, throw1, term2, hand2, throw2)
                 self.siteswap.printSiteswap()
                 self.rawSiteswap = self.getRawInputString(self.siteswap)
+
             else:
                 if self.handler.parseString(userString, quiet = False) != False:
                     self.rawSiteswap = userString
