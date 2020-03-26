@@ -1,3 +1,3 @@
 @echo off
-call  ".\env\Scripts\activate" 
+call  ".\env\Scripts\activate.bat" 
 
