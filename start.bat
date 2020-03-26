@@ -1,3 +1,5 @@
 @echo off
-python ./siteswapUI.py
+call .\env\Scripts\activate
+
+python .\siteswapUI.py
 cmd \k

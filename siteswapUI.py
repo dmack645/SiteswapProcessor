@@ -31,6 +31,7 @@ from asciiArt import getArt
 from siteswapHandler import SiteswapHandler
 from copy import deepcopy
 import re
+import pyperclip
 
 """
 TODO
@@ -133,7 +134,9 @@ class SiteswapUI(object):
 
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
-                print('\n' + self.getJlabString(self.siteswap) + '\n')
+                string = self.getJlabString(self.siteswap)
+                print('\n' + string + '\n')
+                pyperclip.copy(string)
 
             elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
                 swapRE = re.search(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString)
@@ -173,7 +176,7 @@ class SiteswapUI(object):
             return
 
         self.handler.generateStates(self.siteswap)
-        print("Siteswap: " + self.getSimpleString(self.siteswap))
+        print("\nSiteswap: " + self.getSimpleString(self.siteswap))
         print()
         print("States:")
         maxLength = self.siteswap.getMax()
@@ -410,7 +413,13 @@ class SiteswapUI(object):
 
     def printDict(self, dictionary): # format keys - add buffer
         for index in dictionary:
-            print('{:4}{}'.format(str(index)+ ":", str(dictionary[index])))
+            print('{:4}{}'.format(str(index)+ ":", str(dictionary[index])), end = "")
+            if self.handler.parseString(str(dictionary[index])) != False:
+                temp = self.handler.parseString(str(dictionary[index]))
+                self.handler.validate(temp)
+                if not temp.isValid():
+                    print("  INVALID", end = "")
+            print()
 
     def getSimpleString(self, siteswap, mhn = False):
         """Returns a string representation of the structure in MHN format"""
@@ -447,7 +456,7 @@ class SiteswapUI(object):
                 else:
                     hand = 'r'
 
-            if siteswap.symmetric: # SHOULDN'T NEED .SYMMETRIC. JUST ISSYMMETRIC IN HANDLER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            if siteswap.isSymmetric(): # SHOULDN'T NEED .SYMMETRIC. JUST ISSYMMETRIC IN HANDLER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 patternLength = len(siteswap) // 2
             else:
                 patternLength = len(siteswap)
@@ -482,8 +491,10 @@ class SiteswapUI(object):
 
             throwBeat = True
             index = 0
-            length = len(siteswap)
-
+            if siteswap.isSymmetric():
+                length = len(siteswap) // 2
+            else:
+                length = len(siteswap)
             while index < length:
                 if not throwBeat:
                     probe = probe.next
@@ -501,7 +512,9 @@ class SiteswapUI(object):
                 string += ("(%s,%s)" % (left, right))   
                 probe = probe.next
                 index += 1
-                throwBeat = False   
+                throwBeat = False
+            if siteswap.isSymmetric():
+                string += "*"   
             return string      
 
         else:

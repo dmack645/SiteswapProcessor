@@ -230,3 +230,6 @@ class SiteswapHandler(object):
 
 
         return 0
+
+    def drawDiagram(self, siteswap, dwell = 0):
+        pass
