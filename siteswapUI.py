@@ -72,6 +72,7 @@ but with raw input (6x,[40x])(0,2x)(4x,ax)(2x,4) I'm getting :
     The issue might be with how the parser accounts for implicit null beats.
     Solved:
     There's an issue with default parameters of the Siteswap constructor. Must manually construct/pass null throwNode objects
+fix formatting error with invalid rethrow line ([44x],2)(4,2x)
 """
 
 class SiteswapUI(object):
