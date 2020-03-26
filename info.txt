@@ -35,7 +35,7 @@ Syntax:
 swap (term1)(hand1)(throw1) (term2)(hand2)(throw2)
 
 Ex:
-swap 4l0 0rl    
+swap 4l0 0r1    
 
 This swaps term 4's 0th LH throw with term 0's 2nd RH throw
 Indices for terms and throws start at 0. 
@@ -62,7 +62,7 @@ throw at throw2 was to be rethrown, and the new throw at throw2 is now rethrown 
 original throw at throw1 was to be rethrown.
 The first throw value decreases as it is moved from left to right (because it's approaching its
 rethrowing site).
-The first throw value increases as it is moved from right to left (because it's moving away from
+The second throw value increases as it is moved from right to left (because it's moving away from
 its rethrowing site).
 The 'x' status of each throw changes as well so that each throw maintains its rethrowing site.
 
