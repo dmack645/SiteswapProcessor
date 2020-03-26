@@ -20,6 +20,8 @@ Notes should go here
 
 Scan computer for JugglingLab.exe and use that instead of browser if exists
 """ 
+import subprocess
+#subprocess.call([r'.\activateEnv.bat'])
 
 from siteswapParser import Parser
 from siteswap import Siteswap
@@ -32,6 +34,8 @@ from siteswapHandler import SiteswapHandler
 from copy import deepcopy
 import re
 import pyperclip
+
+#import pyperclip
 
 """
 TODO
