@@ -63,7 +63,7 @@ fix formatting error with invalid rethrow line ([44x],2)(4,2x)
 """
 import sys
 
-print(sys.argv[0])
+
 from siteswapParser import Parser
 from siteswap import Siteswap
 from stateGenerator import StateGenerator
@@ -80,7 +80,8 @@ import pyperclip
 
 class SiteswapUI(object):
     jugglingArt = 6 
-    def __init__(self):
+    def __init__(self, venv = False):
+        self.venv = venv
         self.rawSiteswap = ''
         self.printWelcome()
 
@@ -142,8 +143,9 @@ class SiteswapUI(object):
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
                 string = self.getJlabString(self.siteswap)
-                print("Juggling Lab compatible: " + string + '\n')
-                pyperclip.copy(string)
+                print("\nJuggling Lab compatible: " + string + '\n')
+                if self.venv:
+                    pyperclip.copy(string)
 
             elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
                 swapRE = re.search(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString)
@@ -567,7 +569,13 @@ class SiteswapUI(object):
 
 
 def main():
-    generator = SiteswapUI()
+    try:
+        import pyperclip
+        generator = SiteswapUI(True)
+    except:
+        print("Failed to load virtual environment.")
+        generator = SiteswapUI()
+
     generator.run()
 
 if __name__ == "__main__": main()
