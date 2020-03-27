@@ -21,17 +21,6 @@ Notes should go here
 Scan computer for JugglingLab.exe and use that instead of browser if exists
 """ 
 
-from siteswapParser import Parser
-from siteswap import Siteswap
-from stateGenerator import StateGenerator
-import os
-import webbrowser
-from terminalSize import get_terminal_size
-from asciiArt import getArt
-from siteswapHandler import SiteswapHandler
-from copy import deepcopy
-import re
-import pyperclip
 
 
 """
@@ -72,6 +61,22 @@ but with raw input (6x,[40x])(0,2x)(4x,ax)(2x,4) I'm getting :
     There's an issue with default parameters of the Siteswap constructor. Must manually construct/pass null throwNode objects
 fix formatting error with invalid rethrow line ([44x],2)(4,2x)
 """
+import sys
+
+print(sys.argv[0])
+from siteswapParser import Parser
+from siteswap import Siteswap
+from stateGenerator import StateGenerator
+import os
+import webbrowser
+from terminalSize import get_terminal_size
+from asciiArt import getArt
+from siteswapHandler import SiteswapHandler
+from copy import deepcopy
+import re
+import pyperclip
+
+
 
 class SiteswapUI(object):
     jugglingArt = 6 
