@@ -62,7 +62,7 @@ but with raw input (6x,[40x])(0,2x)(4x,ax)(2x,4) I'm getting :
 fix formatting error with invalid rethrow line ([44x],2)(4,2x)
 """
 import sys
-
+from importlib import import_module
 
 from siteswapParser import Parser
 from siteswap import Siteswap
@@ -74,7 +74,7 @@ from asciiArt import getArt
 from siteswapHandler import SiteswapHandler
 from copy import deepcopy
 import re
-import pyperclip
+#import pyperclip
 
 
 
@@ -568,14 +568,19 @@ class SiteswapUI(object):
         print()
 
 
-def main():
-    try:
-        import pyperclip
-        generator = SiteswapUI(True)
-    except:
-        print("Failed to load virtual environment.")
-        generator = SiteswapUI()
+def main(venv):
+    if venv:
+        try:
+            lib = import_module('pyperclip')
+        except:
+            print("Failed to load virtual environment correctly.")
+            generator = SiteswapUI(False)
+        else:
+            globals()['pyperclip'] = lib
+            generator = SiteswapUI(True)
+    else:
+        generator = SiteswapUI(False)
 
     generator.run()
 
-if __name__ == "__main__": main()
+if __name__ == "__main__": main(True)

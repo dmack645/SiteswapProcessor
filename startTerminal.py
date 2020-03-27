@@ -1,8 +1,10 @@
 import subprocess
+import siteswapUI
+
 try:
-    print("WORKED")
-    subprocess.call(r'.\start.bat', True)
+    
+    subprocess.call(r'.\start.bat')
 
 except:
-    print("EXCEPT")
-    subprocess.call(r'python siteswapUI.py', False)
+    print("Failed to load start.bat from startTerminal.py")
+    siteswapUI.main(False)
