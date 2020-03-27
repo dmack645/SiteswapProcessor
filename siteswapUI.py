@@ -20,8 +20,6 @@ Notes should go here
 
 Scan computer for JugglingLab.exe and use that instead of browser if exists
 """ 
-#import subprocess
-#subprocess.call([r'.\activateEnv.bat'])
 
 from siteswapParser import Parser
 from siteswap import Siteswap
@@ -33,7 +31,7 @@ from asciiArt import getArt
 from siteswapHandler import SiteswapHandler
 from copy import deepcopy
 import re
-#import pyperclip
+import pyperclip
 
 
 """
@@ -139,8 +137,8 @@ class SiteswapUI(object):
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
                 string = self.getJlabString(self.siteswap)
-                print('\n' + string + '\n')
-                #pyperclip.copy(string)
+                print("Juggling Lab compatible: " + string + '\n')
+                pyperclip.copy(string)
 
             elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
                 swapRE = re.search(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString)

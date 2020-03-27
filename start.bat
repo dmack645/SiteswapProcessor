@@ -1,6 +1,8 @@
 @echo off
 
-call ".\env\Scripts\activate.bat"
+::call ".\env\Scripts\activate.bat"
 
-python .\siteswapUI.py
+::python .\siteswapUI.py
+::cmd \k
+call env\Scripts\activate.bat && python siteswapUI.py
 cmd \k
