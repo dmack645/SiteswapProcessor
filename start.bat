@@ -4,5 +4,5 @@
 
 ::python .\siteswapUI.py
 ::cmd \k
-call env\Scripts\activate.bat && python siteswapUI.py
+call python siteswapUI.py. __main__
 cmd \k

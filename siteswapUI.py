@@ -80,8 +80,8 @@ import re
 
 class SiteswapUI(object):
     jugglingArt = 6 
-    def __init__(self, venv = False):
-        self.venv = venv
+    def __init__(self, allowCopy = False):
+        self.allowCopy = allowCopy
         self.rawSiteswap = ''
         self.printWelcome()
 
@@ -144,7 +144,7 @@ class SiteswapUI(object):
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")
                 string = self.getJlabString(self.siteswap)
                 print("\nJuggling Lab compatible: " + string + '\n')
-                if self.venv:
+                if self.allowCopy:
                     pyperclip.copy(string)
 
             elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
@@ -568,12 +568,12 @@ class SiteswapUI(object):
         print()
 
 
-def main(venv):
-    if venv:
+def main(copying = True):
+    if copying:
         try:
             lib = import_module('pyperclip')
         except:
-            print("Failed to load virtual environment correctly.")
+            print("Failed to load copy/paste tool.")
             generator = SiteswapUI(False)
         else:
             globals()['pyperclip'] = lib
