@@ -14,11 +14,10 @@ if os.path.isdir("./venv"):
 else:
     try:
         subprocess.check_call("{} -m ensurepip --default-pip".format(callPython), shell = True)
-        subprocess.check_call("{} -m venv venv".format(callPython), shell = True)
         subprocess.check_call([callPython, "-m", "pip", "install", "pyperclip"])
         siteswapUI.main(True)
     except:
-        print("Error installing pip or initializing venv")
+        print("Error installing pip or pyperclip")
         siteswapUI.main(False)
 
 
