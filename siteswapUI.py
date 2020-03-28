@@ -145,7 +145,10 @@ class SiteswapUI(object):
                 string = self.getJlabString(self.siteswap)
                 print("\nJuggling Lab compatible: " + string + '\n')
                 if self.allowCopy:
-                    pyperclip.copy(string)
+                    try:
+                        pyperclip.copy(string)
+                    except:
+                        pass
 
             elif re.match(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString) != None:
                 swapRE = re.search(r'swa?p?\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s+([0-9][0-9]?)([rRlL])([0-9][0-9]?)\s*', userString)
