@@ -4,5 +4,5 @@
 
 ::python .\siteswapUI.py
 ::cmd \k
-call python siteswapUI.py. __main__
+call python siteswapUI.py
 cmd \k

@@ -1,38 +1,253 @@
-6 BEAT FAMILY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It makes more sense for "normal" states to represent fanning-in throws and "primed" states to represent 
+fanning-out throws. This will improve readability. I  make the assumption that a "normal" state's throw happens
+from the "most natural" position (for the given scooping direction), but this doesn't aid in readability. 
+Instead, a "normal" state's throw occurs from the outside and a "primed" state's throw occurs from the inside.
 
-Messes
+A "w" modifier can be appended so that the scooping motion is twice as wide as normal ()
+wide throws will always be normal throws, I think. 
 
-Mess, Inside, "Top"-Xside-"bottom" :  (4)(28).(-4)(28).(4)(-28).    "Flipped Sebs"
-Mess, Inside, "Bottom"-Xside-"top":   (4)(28).(-4)(28).(4)(-28).    "Sebs"
-Mess, Inside, Xtop-side-Xbottom:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Flipped Mills"
-Mess, Inside, Xbottom-side-Xtop:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Mills"
+A "*" modifier implies a special "flourish" described in the JLab coordinates (I bet the flourish can be described
+in MMSTD as well, though)
 
-Mess, Outside, "Top"-Xside-"bottom" : (28)(4).(28)(-4).(-28)(4).    "Flipped Flos"
-Mess, Outside, "Bottom"-Xside-"top":  (28)(4).(28)(-4).(-28)(4).    "Flos Mess"
-Mess, outside, Xtop-side-Xbottom:     (-28)(-4).(28)(-4).(-28)(4).  "Mills Mess"
-Mess, outside, Xbottom-side-Xtop:     (-28)(-4).(28)(-4).(-28)(4).  "Flipped Mills"
+I need to include relative-hand-position states that explore more 2D positions (shapeshifter patterns, dots, etc.)
+So far I just have R, U, and L - and these basically take place on the x-axis. 
+You can add z coordinates to uncrossed states (look at next/previous states for context).
 
-He said flipped flos is time reversed sebs
-In short words: the flos/sebs/analog/inverted family, whatever we call it, is two uncrossed throws 
-and one crossed throw OR two native throws and one non-native.
-While the mills family is two crossed, one uncrossed.
+I need to hammer down the TR algorithm using just JLab coordinates. It'll be eaiser to figure out what happens with 
+the "w" and "*" modifiers in MSTD shorthand. 
 
-I need to clarify that this is all for siteswap 3
-For siteswap 3, the catching coordinate of a given beat determines the direction of the throw made one beat before it
-For siteswap 4, this coordinate determines the direction of the throw made 2 beats before it. 
-His 4 ball sebs looks different than his 3 ball sebs. 
+I need to rewrite all of this.
 
-CORRECTED FOR 4 BALL: (Wrong?)
-Mess, outside, Xtop-side-Xbottom:     (-28)(4).(28)(-4).(-28)(-4).  "Mills Mess"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Mess, Inside, "Top"-Xside-"bottom" :  (4)(28).(-4)(28).(4)(-28).    "Flipped Sebs"
-Mess, Inside, "Bottom"-Xside-"top":   (4)(28).(-4)(-28).(4)(-28).    "Sebs" I don't think this is right
-Mess, Inside, Xtop-side-Xbottom:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Flipped Mills"
-Mess, Inside, Xbottom-side-Xtop:      (-4)(-28).(4)(-28).(-4)(28).  "Time Reversed Mills"
 
-Mess, Outside, "Top"-Xside-"bottom" : (28)(4).(28)(-4).(-28)(4).    "Flipped Flos"
-Mess, Outside, "Bottom"-Xside-"top":  (28)(4).(28)(-4).(-28)(4).    "Flos Mess"
-Mess, outside, Xtop-side-Xbottom:     (-28)(-4).(28)(4).(-28)(4).  "Mills Mess"
-Mess, outside, Xbottom-side-Xtop:     (-28)(-4).(28)(4).(-28)(4).  "Flipped Mills"
 
-I think I learned time reversed mess wrong
+
+
+
+
+Mapping (Modified) MSTD to Juggling Lab Hand Position Coordinates
+
+First off, I'm using the Gandini "scoop direction" convention.
+In this convention, clockwise right-hand throws are considered right
+inside throws (ri), ccw RH throws are considered right outside throws (ro),
+ccw LH throws are considered left inside throws (li), and cw LH throws
+are considered left outside throws (lo). This is true regardless of
+where the hands are in space. 
+
+To convert everything to the other convention (that Eric Sipos and others use), 
+simply make the swap i <-> o for every crossed state (R or L).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Basic Mess State Diagrams (MSTDs) 
+
+For each unique site in a pattern, MSTDs describe the crossing state (capital letter), the 
+throw hand (lowercase letter), and the scooping-direction of the throwing motion (i/o).
+It is assumed that the throw is made from its "natural" throwing position (for now). 
+Check the different columns in the upper half of the chart below for natural throwing postions.
+
+     Basic Mess
+     MSTD(Basic Mess)              
+     ~~~~~~~~~~~~~~ 
+     Lr   -+->   Ll      
+
+      ^          |         
+      o          + (== "i")     
+      |          v  
+
+     Ul          Ur 
+
+      ^          | 
+      +          o        
+      |          v               
+
+     Rr   <-+-   Rl 
+
+     Shorthand: Rri  Ulo  Lri  Lli  Uro  Rli
+     SH(MSTD(Basic Mess))
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Time-Reverse Function TR()
+
+TR(MSTD)     => reverse all the arrows and make the swaps r <-> l / i <-> o
+TR(SH(MSTD)) => reverse the list, rotate the scooping direction values 1 to the left, and apply r <-> l / i <-> o.
+
+This will not work the same way with the other scooping direction convention. 
+
+After applying the TR function, the "fanning direction" of all throws will reverse.
+All throws in the basic mess "fan inwards", and all throws in TR(basic mess) "fan outwards".
+This means that there might be some states with throws that are not made from their natural
+throwing position.
+
+Ex: Lro "naturally" wants to be thrown fanning outwards to the left from the center. 
+    (in reality, it wants to make a throw from the center and make the next catch crossed underneath - the state
+    itself doesn't determine fanning direction)
+    Lro can be forced to be thrown fanning inwards from the right side under the correct circumstances.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Modified MSTD (MMSTD) 
+
+States that normally fan throws inwards can be modified to instead fan throws outwards. 
+Lri, Lli, Uro, Ulo, Rli, and Rri all "naturally" fan inwards. In other words, if the throw direction is in the same
+direction as the scooping direction (i/o), the throw direction is towards the center of your body.
+
+States that normally fan outwards can be modified in the same way.
+Lro, Llo, Uri, Uli, Rlo, and Rro all "naturally" fan outwards.
+
+Adding a "'" to a state (or "priming it") modifies the throw coordinate so that its natural fanning direction can
+be swapped (fan in <-> fan out). To do this, the throw coordinate is placed at the center and the catch coordinate
+is adjusted to maintain the state's scooping direction.
+This info is independent of the scooping direction (i/o) and adds some clarity to our model. 
+
+In reality, this only changes the thrown object's takeoff point - not the direction the throw is made from there. 
+The adjusted catch coordinate changes the catching location (and therefore direction) of the throw that is 
+caught there (the throw whose causal arrow points to this site). 
+You can tell a state fans outwards if its throw coordinate is from the center and if the catch coordinate of the
+state its causal arrow points to is on the outside (naturally or otherwise).
+
+If a pattern isn't structured properly, "primed" states might contradict their intended crossing state. 
+I think this can be true with normal states too, but it's easier to avoid(?). 
+
+Column throws occur when the catch coordinate of a throw is the same as its throw coordinate. Both primed
+and unprimed states can lead to column throws being made. 
+
+Look at the coordinates for the first throw in Sebs mess - without further information, it's not apparent 
+that the throw is made under the wrist. We need to look at the previous state for more context. 
+Because Ulo'(?) is a primed uncrossed outside throw, it is made from the center of the body with an outside (cw) 
+scooping motion (similar to Llo). This outside scooping motion leaves the left hand crossed on top - we know this 
+because the next state is Lri'. With this information, we can assign z coordinates to Ulo' if we wish. 
+It won't make the animation much nicer, but it feels good, man. 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Good Stuff                          
+
+Here are some common variations on the basic mess. 
+
+PATTERN                 MMSTD and Juggling Lab Coordinates
+------------------------------------------------------------------------------
+Basic Mess              Rri  Ulo  Lri  Lli  Uro  Rli
+                        (-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).
+
+TR Basic Mess           Rlo  Rri  Ulo  Lro  Lli  Uro      (First get the basic states from the TR algorithm)
+(The Weave)             Rlo  Rri' Ulo' Lro  Lli' Uro'     (Prime appropriate terms. All throws fan outwards)
+                        (  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).  (It works!)
+
+Flipped Basic Mess      Lri  Ulo  Rri  Rli  Uro  Lli
+                        (-24,-10)(  0,-10).( 24)(  0).(-24, 10)(  0, 10).
+
+TR Flipped Basic Mess   Llo  Lri' Ulo' Rro  Rli' Uro'
+                        (  0, 10)(-24, 10).(  0,-10)( 24,-10).(  0)(-24).
+
+Flos Mess               Uro  Rli  Uro  Ulo  Lri  Ulo
+                        ( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).
+
+TR Flos Mess            Uli  Uro' Lli' Uri  Ulo' Rri'
+                        (  0)( 24).(  0)(-24).(  0, 10)( 24, 10).
+
+Flipped Flos Mess       Uro  Lli  Uro  Ulo  Rri  Ulo
+(TR Sebs/Bastion Mess)  ( 24)(  0).(-24, 10)(  0, 10).( 24)(  0).
+
+TR Flipped Flos Mess    Uli  Uro' Rli' Uri  Ulo' Lri'
+(Sebs/Bastion Mess)     (  0)( 24).(  0)(-24).(  0,-10)( 24,-10).
+
+Half Boston Mess        Ulo  Urow Rlo  Rri  Rliw Uri
+                        ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+
+TR Half Boston Mess     Uro  Ulow Rro  Rli  Rriw Uli 
+                        ( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+Flipped 1/2 Boston      Ulo  Urow Llo  Lri  Lliw Uri
+                        ( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+TR Flipped 1/2 Boston   Uro  Ulow Lro  Lli  Lriw Uli
+                        ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+
+Boston Mess             Ulo  Urow Rlo  Rri  Rliw Uri  Ulo  Urow Llo  Lri  Lliw Uri
+                        ( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+                       +( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+TR Boston Mess          Uro  Ulow Lro  Lli  Lriw Uli  Uro  Ulow Rro  Rli  Rriw Uli
+                        ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+                       +( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+
+                        4   2   3   4   2   3
+Burke's Barrage        Lri  Lli  Uro  Rli  Rri  Ulo
+                       (-24,-10)(  0,-10).(-24, 10)(  0, 10).( 24)(  0). -> 423
+
+                        4    2    3    4    2    3
+TR Burke's Barrage     Lli' Uro' Rlo  Rri' Ulo' Lro
+                       (  0, 10)( 24, 10).(  0)(-24).(  0,-10)(-24,-10).
+
+                        5    2    2    3    3    5    2    2    3    3
+Rubenstein's Revenge   Lri  Lli  Uro  Rli  Uro  Rli  Rri  Ulo  Lri  Ulo 
+                       (-24,-10)(  0,-10).(-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).
+
+                        3    5    2    2    3    3    5    2    2    3
+TR Rubenstein's        Lli' Uro' Lli' Uro' Rlo  Rri' Ulo' Rri' Ulo' Lro
+(NOT Romeo's)          (  0, 10)( 24, 10).(  0)(-24).(  0, 10)( 24, 10).(  0)(-24).(  0,-10)(-24,-10).
+
+                        5    2    2    3    3*   5    2    2    3    3*
+Romeo's Revenge        Lri  Lli  Uro  Rli  Rri  Rli  Rri  Ulo  Lri  Lli
+                       (-24,-10)(  0,-10).(-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).t(-24, 10)c(  0, 10)(-24,-10).
+
+                        3*   5    2    2    3    3*   5    2    2    3
+TR Romeo's Revenge     Llo  Lro  Lli' Uro' Rlo  Rro  Rlo  Rri' Ulo' Lro
+                       t(  0, 10)c(-24, 10)(-10,  0).(  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).(  0,-10)(-24,-10).
+
+                        4    2*   3    3    3    4    2*   3    3    3 
+Alex's Revenge         Lri  Lliw Urow Lli  Uro  Rli  Rriw Ulow Rri  Ulo
+                       (-24,-10)(  0,-10).t(-24, 10)c( 24, 20)(0,10).( 24)(-24,-20).(-24, 10)(  0, 10).( 24)(  0).
+
+                        3    3    4w   2w*  3    3    3    4w    2w*  3 
+TR Alex's Revenge      Lli' Uro' Rli  Uro' Rlo  Rri' Ulo  Lri  Ulo' Lro
+                       (  0, 10)( 24, 10).(  0)(-24).(-24,-10)( 24,-10).t(  0, 10)c( 24, 20)(-24, 10).(  0,-10)(-24,-10).
+ 
+
+
+
+To get time reverse of siteswap in mills mess:
+Write in the siteswap's "rethrow line" (write each value underneath the site where it is thrown again)
+(-,5)(2,-)(-,2)(3,-)(-,3)(5,-)(-,2)(2,-)(-,3)(3,-)
+   5  3      3  2      2  5      3  3      2  2     <-- This line backwards is a valid siteswap. 
+      ^                                                 Usually it's the same (but not always).
+      ^ If you follow the TR algorithm the way I do it, start the time reversed mess pattern here. 
+
+===================================================================>
+                        MMSTD TO JLab Key                          |
+===================================================================>
+                           NORMAL STATES                           |
+            Fans in              |          Fans out               |
+    Lri : (-24,-10)(  0,-10).    |    Lro : (  0,-10)(-24,-10).    |
+    Lli : (-24, 10)(  0, 10).    |    Llo : (  0, 10)(-24, 10).    |
+                                 |                                 |   
+    Uro : ( 24)(  0).            |    Uri : (  0)( 24).            |
+    Ulo : ( 24)(  0).            |    Uli : (  0)( 24).            |
+                                 |                                 |
+    Rli : (-24,-10)(  0,-10).    |    Rlo : (  0,-10)(-24,-10).    |
+    Rri : (-24, 10)(  0, 10).    |    Rro : (  0, 10)(-24, 10).    |
+                                 |                                 |
+===================================================================>
+                           PRIMED STATES                           |
+            Fans out             |          Fans in                |
+    Lri': (  0,-10)( 24,-10).    |    Lro': ( 24,-10)(  0,-10).    |
+    Lli': (  0, 10)( 24, 10).    |    Llo': ( 24, 10)(  0, 10).    |
+                                 |                                 |
+    Uro': (  0)(-24).            |    Uri': (-24)(  0).            |
+    Ulo': (  0)(-24).            |    Uli': (-24)(  0).            |
+                                 |                                 |
+    Rli': (  0,-10)( 24,-10).    |    Rlo': ( 24,-10)(  0,-10).    |
+    Rri': (  0, 10)( 24, 10).    |    Rro': ( 24, 10)(  0, 10).    |
+                                 |                                 |
+===================================================================>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Half Boston Mess:       Ulo  Uro Rlo  Rri  Rli Uri
+                        ( 24)(  0).( 24)(  0).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)(  0,-10).(  0)( 24).
+notes: Ulo causes Uro. We know Ulo is supposed to be a column throw, so we adjust the catch coordinate of Uro.
+       Rri causes Rli. We know Rri is supposed to be a column throw, so we adjust the catch coordinate of Rli.
+       My method doesn't automatically account for scooping motions twice as wide as normal, like with these.
+       Add a "w" modifier to states that have scooping motions that are twice as wide
+
+Interesting Patterns:
+TR basic mess in 342 and 345

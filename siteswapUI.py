@@ -60,7 +60,14 @@ but with raw input (6x,[40x])(0,2x)(4x,ax)(2x,4) I'm getting :
     Solved:
     There's an issue with default parameters of the Siteswap constructor. Must manually construct/pass null throwNode objects
 fix formatting error with invalid rethrow line ([44x],2)(4,2x)
+
+Add magic methods to Siteswap and Thrownode. It'd be nice if s[2] returned a tuple of its Thrownode objects 
+and t[1] returned a tuple of the value/valueX
+
+Get a nicer chair!! (or ask for one). Need to sit higher with better back support
+
 """
+
 import sys
 from importlib import import_module
 
@@ -74,6 +81,7 @@ from asciiArt import getArt
 from siteswapHandler import SiteswapHandler
 from copy import deepcopy
 import re
+from drawDiagram import Ladder
 #import pyperclip
 
 
@@ -123,6 +131,10 @@ class SiteswapUI(object):
 
             elif userString == 'state':
                 self.pickState()
+
+            elif userString == 'd':
+                l = Ladder()
+                l.load(self.siteswap, 0, 100, self.getJlabString(self.siteswap))
 
             elif userString == 'ba':
                 if len(self.previousSiteswaps) > 1:

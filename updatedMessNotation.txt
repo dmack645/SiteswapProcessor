@@ -1,0 +1,262 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+It makes more sense for "normal" states to represent fanning-in throws and "primed" states to represent 
+fanning-out throws. This will improve readability. 
+I previously made the assumption that a "normal" state's throw happens
+from the "most natural" position (for the given scooping direction), but this doesn't aid in readability, since
+determinding the "most natural" position requires considering the scooping direction. 
+
+Instead, a "normal" state's throw should always occur from an outside postion, and a "primed" state's throw 
+should always occur from the inside position. The outside position thrown from does, indeed, depend on
+the scooping-direction value. Since my simplified model only has one "center" coordinate (distinct from i/o),
+every primed strate involves a throw made from (0,0).
+
+A "w" modifier can be appended so that the scooping motion is twice as wide as normal ()
+wide throws will always be normal throws, I think. 
+
+A "*" modifier implies a special "flourish" described in the JLab coordinates (I bet the flourish can be described
+in MMSTD as well, though)
+
+I need to include relative-hand-position states that explore more 2D positions (shapeshifter patterns, dots, etc.)
+So far I just have R, U, and L - and these basically take place on the x-axis. 
+You can add z coordinates to uncrossed states (look at next/previous states for context).
+
+I need to hammer down the TR algorithm using just JLab coordinates. It'll be eaiser to figure out what happens with 
+the "w" and "*" modifiers in MSTD shorthand. 
+
+I need to rewrite all of this.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Time-Reverse Function TR()
+The rules, in short:
+
+MMSTD diagram:     => reverse all the arrows and make the swaps r <-> l / i <-> o. Throw/catch coordinates swapped.
+MMSTD shorthand:   => reverse the list, rotate the scooping direction values 1 to the left, apply r <-> l / i <-> o
+                      and add or remove "'".
+
+Siteswap:        2 3 4 5 6 <-- original siteswap, but we need time-reversed siteswap
+Checking line:   6 4 2 5 3 <-- read this line backwards starting at second position: 46352
+            ^               
+Let's use this method on shorthand for the basic mess (other siteswaps explained later):
+Lli  Uro  Rli  Uro  Rli  Rri  Ulo  Lri  Ulo  Lri 
+
+1) Reverse the list (I always start with the first state and wrap around leftwards)
+     Lli  Lri  Ulo  Lri  Ulo  Rri  Rli  Uro  Rli  Uro
+
+2) Make the swaps r <-> l / i <-> o, shift all i/o to the left by 1, and add "'":
+     Lro' Lli' Uro' Lli' Uro' Rlo' Rri' Ulo' Rri' Ulo'
+
+
+This will not work the same way with the other scooping direction convention. 
+
+After applying the TR function, the "fanning direction" of all throws will reverse.
+All throws in the basic mess "fan inwards", and all throws in TR(basic mess) "fan outwards".
+There might be some states with throws that are not made from their natural throwing position.
+
+Ex: Lro "naturally" wants to be thrown fanning outwards to the left from the center (as Lro'). 
+    (in reality, it wants to make a throw from the center and make the next catch crossed underneath - the state
+    itself doesn't determine fanning direction). Lro can be forced to be thrown fanning inwards from the right side.
+
+
+What if the siteswap isn't 3? 
+Lets look at this 23456 mess. (read stacked arrows left to right).
+
+  A 23456 extended mess       TR(A 23456 extended mess)
+  ~~~~~~~~~~~~~~~~~~~~~         ~~~~~~~~~~~~~~~~~~~~~ 
+     Lr  6-+->   Ll                Ll   <-o'-4 Lr   
+     4           2               6   5            
+   ^ | ^         |               | ^ |         ^   
+   o + o         +               +'o'+'        o' 
+   | v |         v               v | v         | 
+   3   5                           3           2
+     Ul          Ur                Ur          Ul 
+               3   5               2           3     
+     ^         | ^ |               |         ^ | ^
+     +         o + o               o'        +'o'+' 
+     |         v | v               v         | v |
+     2           4                           6   5 
+     Rr   <-+-6  Rl                Rl  4-o'->  Rr 
+
+How did I do this? First, let's time reverse the siteswap.
+The easiest way to do this is to write out the siteswap, create
+a "checking line" underneath it, then read the checking line backwards.
+To create a checking line, rewrite each value underneath the beat where 
+it will be thrown again. While I'm showing my examples in vanilla siteswap
+notation, this works in basic sync notation as well as in multi-hand notation 
+(MHN), which is my preferred notation*.
+
+Siteswap: 2 3 4 5 6 
+          6 4 2 5 3 <-- read this line backwards (think about this - it makes sense)
+
+So 23456 time-reversed is 35246. 
+
+How do I know which throw is thrown from which state? 
+Let's look at the 6 at the top of the original diagram. This is originally
+an under-arm RH inside throw. If we think about it, it makes sense that the TR'd 
+version would call for an under-arm RH outside throw - the scooping direction is
+reversed. But in the TR'd version, the throw that's originally caught on that beat 
+is now being thrown instead. How can we tell which throw is being caught on that 
+beat? Causal diagrams show these relationships (see Martin Frost's article on causal 
+diagrams on passingDB.com). The throw that "causes" the 6 to be thrown in the original 
+will be thrown here in the TR version.
+
+There's a shortcut: rotate the "checking line" to the left by 2.
+
+Siteswap: 2 3 4 5 6 
+          2 5 3 6 4 <-- this tells us that the 6 is "caused" by the 4 (the 4 is caught afterwards)
+
+Since the 6 is caused by the 4, we know that the Lro' state we were looking at 
+has siteswap value 4 (the rest can be filled in sequentially).
+
+
+The really fast and easy way: 
+
+Siteswap: 2 3 4 5 6 
+          6 4 2 5 3 <-- read checking line backwards starting at second position: 46352
+            ^
+              
+Using this method, I can quickly find the time reversed pattern in MMSTD shorthand:
+Siteswap:   2    3    4    5    6    2    3    4    5    6
+MMSTD:     Lli  Uro  Rli  Uro  Rli  Rri  Ulo  Lri  Ulo  Lri 
+JLab:      (-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).(-24,-10)(  0,-10).
+
+Siteswap:   4    6    3    5    2    4    6    3    5    2
+MMSTD:     Lro' Lli' Uro' Lli' Uro' Rlo' Rri' Ulo' Rri' Ulo'
+Jlab:      (  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).(  0, 10)( 24, 10).(  0)(-24).
+
+What about wide scooping motions and special flourishes? 
+
+This website lets you time-reverse gifs: https://ezgif.com/reverse
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===================================================================>
+                        MMSTD TO JLab Key                          |
+===================================================================>
+                      NORMAL STATES FAN IN                         |
+    Lri : (-24,-10)(  0,-10).    |    Lro : ( 24,-10)(  0,-10).    |
+    Lli : (-24, 10)(  0, 10).    |    Llo : ( 24, 10)(  0, 10).    |
+                                 |                                 |   
+    Uro : ( 24)(  0).            |    Uri : (-24)(  0).            |
+    Ulo : ( 24)(  0).            |    Uli : (-24)(  0).            |
+                                 |                                 |
+    Rli : (-24,-10)(  0,-10).    |    Rlo : ( 24,-10)(  0,-10).    |
+    Rri : (-24, 10)(  0, 10).    |    Rro : ( 24, 10)(  0, 10).    |
+                                 |                                 |
+===================================================================>
+                      PRIMED STATES FAN OUT                        |
+    Lri': (  0,-10)( 24,-10).    |    Lro': (  0,-10)(-24,-10).    |
+    Lli': (  0, 10)( 24, 10).    |    Llo': (  0, 10)(-24, 10).    |
+                                 |                                 |
+    Uro': (  0)(-24).            |    Uri': (  0)( 24).            |
+    Ulo': (  0)(-24).            |    Uli': (  0)( 24).            |
+                                 |                                 |
+    Rli': (  0,-10)( 24,-10).    |    Rlo': (  0,-10)(-24,-10).    |
+    Rri': (  0, 10)( 24, 10).    |    Rro': (  0, 10)(-24, 10).    |
+                                 |                                 |
+===================================================================>
+
+Rlo' Rri'Ulo'
+(  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Good Stuff                          
+
+Here are some common variations on the basic mess. 
+
+PATTERN                 MMSTD and Juggling Lab Coordinates
+------------------------------------------------------------------------------
+Basic Mess                  Rri  Ulo  Lri  Lli  Uro  Rli
+                            (-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).
+
+TR Basic Mess               Rlo  Rri  Ulo  Lro  Lli  Uro      (First get the basic states from the TR algorithm)
+(The Weave)                 Rlo' Rri' Ulo' Lro' Lli' Uro'     (Every state is primed because they now fan outwards)
+                            (  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).  (It works!)
+
+Flipped Basic Mess          Lri  Ulo  Rri  Rli  Uro  Lli
+                            (-24,-10)(  0,-10).( 24)(  0).(-24, 10)(  0, 10).
+
+TR Flipped Basic Mess       Llo' Lri' Ulo' Rro' Rli' Uro'
+                            (  0, 10)(-24, 10).(  0,-10)( 24,-10).(  0)(-24).
+
+Flos Mess                   Uro  Rli  Uro  Ulo  Lri  Ulo
+                            ( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).
+
+TR Flos Mess                Uli' Uro' Lli' Uri' Ulo' Rri'
+                            (  0)( 24).(  0)(-24).(  0, 10)( 24, 10).
+
+Flipped Flos Mess           Uro  Lli  Uro  Ulo  Rri  Ulo
+(TR Sebs/Bastion Mess)      ( 24)(  0).(-24, 10)(  0, 10).( 24)(  0).
+
+TR Flipped Flos Mess        Uli' Uro' Rli' Uri' Ulo' Lri'
+(Sebs/Bastion Mess)         (  0)( 24).(  0)(-24).(  0,-10)( 24,-10).
+
+Extended Basic Mess         Lli  Uro  Rli  Uro  Rli  Rri  Ulo  Lri  Ulo  Lri 
+                            (-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).(-24,-10)(  0,-10).
+
+TR Extended Basic Mess      Lro' Lli' Uro' Lli' Uro' Rlo' Rri' Ulo' Rri' Ulo'
+                            (  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).(  0, 10)( 24, 10).(  0)(-24).
+
+Half Boston Mess            Ulo  Urow Rlo' Rri  Rliw Uri'
+                            ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+
+TR Half Boston Mess         Uro  Ulow Rro' Rli  Rriw Uli' 
+                            ( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+Flipped 1/2 Boston          Ulo  Urow Llo' Lri  Lliw Uri'
+                            ( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+TR Flipped 1/2 Boston       Uro  Ulow Lro' Lli  Lriw Uli'
+                            ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+
+Boston Mess                 Ulo  Urow Rlo' Rri  Rliw Uri' 
+                           +Ulo  Urow Llo' Lri  Lliw Uri'
+                            ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+                           +( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+TR Boston Mess              Uro  Ulow Lro' Lli  Lriw Uli' 
+                           +Uro  Ulow Rro' Rli  Rriw Uli'
+                            ( 24)(  0).( 24)(-24).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)( 24,-10).(  0)( 24).
+                           +( 24)(  0).( 24)(-24).(  0, 10)(-24, 10).(-24,-10)(  0,-10).(-24, 10)( 24, 10).(  0)( 24).
+
+                           4   2   3   4   2   3
+Burke's Barrage           Lri  Lli  Uro  Rli  Rri  Ulo
+                          (-24,-10)(  0,-10).(-24, 10)(  0, 10).( 24)(  0). -> 423
+
+                           4    2    3    4    2    3
+TR Burke's Barrage        Lli' Uro' Rlo' Rri' Ulo' Lro'
+                          (  0, 10)( 24, 10).(  0)(-24).(  0,-10)(-24,-10).
+
+                           2    3    4    5    6    2    3    4    5    6
+23456 ext. Basic Mess     Lli  Uro  Rli  Uro  Rli  Rri  Ulo  Lri  Ulo  Lri 
+                          (-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).(-24,-10)(  0,-10).
+
+                           4    6    3    5    2    4    6    3    5    2
+TR 23456 ext Basic Mess   Lro' Lli' Uro' Lli' Uro' Rlo' Rri' Ulo' Rri' Ulo'
+                          (  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).(  0, 10)( 24, 10).(  0)(-24).
+##################################################################################################################ABOVE UPDATED
+                        5    2    2    3    3    5    2    2    3    3
+Rubenstein's Revenge   Lri  Lli  Uro  Rli  Uro  Rli  Rri  Ulo  Lri  Ulo 
+                       (-24,-10)(  0,-10).(-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).( 24)(  0).
+
+                        3    5    2    2    3    3    5    2    2    3
+TR Rubenstein's        Lli' Uro' Lli' Uro' Rlo  Rri' Ulo' Rri' Ulo' Lro
+(NOT Romeo's)          (  0, 10)( 24, 10).(  0)(-24).(  0, 10)( 24, 10).(  0)(-24).(  0,-10)(-24,-10).
+
+
+
+
+# link JLab coordinate TR algorithm to MSTD TR algorithm to figure out how TR works on *'d states
+                        5    2    2    3    3*   5    2    2    3    3*
+Romeo's Revenge        Lri  Lli  Uro  Rli  Rri  Rli  Rri  Ulo  Lri  Lli
+                       (-24,-10)(  0,-10).(-24, 10)(  0, 10).( 24)(  0).(-24,-10)(  0,-10).t(-24, 10)c(  0, 10)(-24,-10).
+
+                        3*   5    2    2    3    3*   5    2    2    3
+TR Romeo's Revenge     Llo  Lro  Lli' Uro' Rlo  Rro  Rlo  Rri' Ulo' Lro
+                       t(  0, 10)c(-24, 10)(-10,  0).(  0,-10)(-24,-10).(  0, 10)( 24, 10).(  0)(-24).(  0,-10)(-24,-10).
+
+                        4    2*   3*   3    3    4    2*   3    3    3 
+Alex's Revenge         Lri  Lliw Urow Lli  Uro  Rli  Rriw Ulow Rri  Ulo
+                       (-24,-10)(  0,-10).t(-24, 10)c( 24, 20)(0,10).( 24)(-24,-20).(-24, 10)(  0, 10).( 24)(  0).
+
+                        3    3    4w   2w*  3    3    3    4w    2w*  3 
+TR Alex's Revenge      Lli' Uro' Rli  Uro' Rlo  Rri' Ulo  Lri  Ulo' Lro
+                       (  0, 10)( 24, 10).(  0)(-24).(-24,-10)( 24,-10).t(  0, 10)c( 24, 20)(-24, 10).(  0,-10)(-24,-10).
