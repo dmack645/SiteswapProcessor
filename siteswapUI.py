@@ -82,6 +82,7 @@ from siteswapHandler import SiteswapHandler
 from copy import deepcopy
 import re
 from drawDiagram import Ladder
+import subprocess
 #import pyperclip
 
 
@@ -145,12 +146,20 @@ class SiteswapUI(object):
                     print("\nNo previous siteswaps to load.\n")
 
             elif userString == 'a':
-                jLab = self.getJlabString(self.siteswap)
+                jLab = str(self.getJlabString(self.siteswap))
+                """
                 url = "https://jugglinglab.org/anim?pattern=" + jLab
                 #url += ";gravity=2500.0;bps=6.5"
                 webbrowser.open_new_tab(url)
-                print("\nAttempting to load Juggling Lab gif in default browser.")
-                print("Siteswap string: " + jLab + '\n')
+                print("nAttempting to load Juggling Lab gif in default browser.")
+                """
+                tempString = r'.\"Juggling Lab"\"jlab.bat" anim "' + jLab.encode('unicode-escape').decode()+r'"'
+                
+                subprocess.call(tempString, shell = True) # run this in a separate thread
+
+                print()
+
+
 
             elif userString == 'jlab':
                 #print("Current pattern in Juggling Lab compatible siteswap notation: ")

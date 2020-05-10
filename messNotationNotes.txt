@@ -1,3 +1,33 @@
+The goal is to get people comfortable with more generalized models for juggling, like MHN and Pretzel,
+without the need for searching around on Google for related articles as you go.
+
+What is MHN (basic) (explain the very very very basics of siteswap theory. What is a site?
+What is a term?)
+
+What is vanilla siteswap:
+
+Vanilla siteswap is a model that describes a very particular attribute of a given juggling pattern.
+There is an easy, yet inacurrate, way to conceptualize it: a sequence of terms that describe the relative height differences and hand destinations of each throw in a juggling pattern (break this into two sentences). 
+(what is a term?) 
+A vanilla siteswap is a list of terms that are assumed to repeat circularly an infinite number of times. 
+Siteswap "3" is assumed to be read as "333...", siteswap "[54]24" is assumed to be read as "[54]24[54]24[54]24..., etc". Each value (sometimes contained within square brackets or parentheses) represents an event that takes 
+place on a "beat". In this simplified model, each beat is a regularly spaced point in time in which an event 
+(likely a throw) can take place. In our basic, monospaced, model, every beat occurs at a regular time interval. 
+For example: 4 beats per seconds (bps). 
+
+What is simplified sync siteswap?
+
+Recap of simplifications/generalizations. Tie everything back to MHN.
+
+Multi-hand siteswap (Vanilla siteswap format can be used with different implied site orders)
+(what simplifications does MHN retain from vanilla and simplified sync? Even/odd rule)
+
+Adding delay and sites to MHN
+
+The Prechac Transform
+
+
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 It makes more sense for "normal" states to represent fanning-in throws and "primed" states to represent 
 fanning-out throws. This will improve readability. I  make the assumption that a "normal" state's throw happens
@@ -215,7 +245,7 @@ Write in the siteswap's "rethrow line" (write each value underneath the site whe
       ^ If you follow the TR algorithm the way I do it, start the time reversed mess pattern here. 
 
 ===================================================================>
-                        MMSTD TO JLab Key                          |
+                        MMSTD TO JLab Key   (Old)                  |
 ===================================================================>
                            NORMAL STATES                           |
             Fans in              |          Fans out               |
@@ -241,6 +271,64 @@ Write in the siteswap's "rethrow line" (write each value underneath the site whe
     Rri': (  0, 10)( 24, 10).    |    Rro': ( 24, 10)(  0, 10).    |
                                  |                                 |
 ===================================================================>
+
+===================================================================>
+                        MMSTD TO JLab Key   (New)                  |
+===================================================================>
+                           NORMAL STATES                           |
+            Fans in              |          Fans out               |
+    Lro : (-24,-10)(  0,-10).    |    Lri : (  0,-10)(-24,-10).    |
+    Llo : (-24, 10)(  0, 10).    |    Lli : (  0, 10)(-24, 10).    |
+                                 |                                 |   
+    Uro : ( 24)(  0).            |    Uri : (  0)( 24).            |
+    Ulo : ( 24)(  0).            |    Uli : (  0)( 24).            |
+                                 |                                 |
+    Rlo : (-24,-10)(  0,-10).    |    Rli : (  0,-10)(-24,-10).    |
+    Rro : (-24, 10)(  0, 10).    |    Rri : (  0, 10)(-24, 10).    |
+                                 |                                 |
+===================================================================>
+                           PRIMED STATES   (unfinished)            |
+            Fans out             |          Fans in                |
+    Lri': (  0,-10)( 24,-10).    |    Lro': ( 24,-10)(  0,-10).    |
+    Lli': (  0, 10)( 24, 10).    |    Llo': ( 24, 10)(  0, 10).    |
+                                 |                                 |
+    Uro': (  0)(-24).            |    Uri': (-24)(  0).            |
+    Ulo': (  0)(-24).            |    Uli': (-24)(  0).            |
+                                 |                                 |
+    Rli': (  0,-10)( 24,-10).    |    Rlo': ( 24,-10)(  0,-10).    |
+    Rri': (  0, 10)( 24, 10).    |    Rro': ( 24, 10)(  0, 10).    |
+                                 |                                 |
+===================================================================>
+
+===================================================================>
+                        MMSTD TO JLab Key   (New)                  |
+===================================================================>
+                           NORMAL STATES                           |
+            Fans in              |          Fans out               |
+    Lro : (-24,-10)(  0,-10).    |    Lri : (  0,-10)(-24,-10).    |
+    L
+    Llo : (-24, 10)(  0, 10).    |    Lli : (  0, 10)(-24, 10).    |
+                                 |                                 |   
+    Uro : ( 24)(  0).            |    Uri : (  0)( 24).            |
+    Ulo : ( 24)(  0).            |    Uli : (  0)( 24).            |
+                                 |                                 |
+    Rlo : (-24,-10)(  0,-10).    |    Rli : (  0,-10)(-24,-10).    |
+    Rro : (-24, 10)(  0, 10).    |    Rri : (  0, 10)(-24, 10).    |
+                                 |                                 |
+===================================================================>
+                           PRIMED STATES   (unfinished)            |
+            Fans out             |          Fans in                |
+    Lri': (  0,-10)( 24,-10).    |    Lro': ( 24,-10)(  0,-10).    |
+    Lli': (  0, 10)( 24, 10).    |    Llo': ( 24, 10)(  0, 10).    |
+                                 |                                 |
+    Uro': (  0)(-24).            |    Uri': (-24)(  0).            |
+    Ulo': (  0)(-24).            |    Uli': (-24)(  0).            |
+                                 |                                 |
+    Rli': (  0,-10)( 24,-10).    |    Rlo': ( 24,-10)(  0,-10).    |
+    Rri': (  0, 10)( 24, 10).    |    Rro': ( 24, 10)(  0, 10).    |
+                                 |                                 |
+===================================================================>
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Half Boston Mess:       Ulo  Uro Rlo  Rri  Rli Uri
                         ( 24)(  0).( 24)(  0).(  0,-10)(-24,-10).(-24, 10)(  0, 10).(-24,-10)(  0,-10).(  0)( 24).

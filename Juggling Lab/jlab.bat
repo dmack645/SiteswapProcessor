@@ -6,7 +6,7 @@ REM Copyright 2019 by Jack Boyce and others
 REM Released under the GNU General Public License v2
 
 SET "JL_EXE="
-SET "JL_BAT_DIR=%~dp0\Juggling Lab"
+SET "JL_BAT_DIR=%~dp0"
 SET "JL_WORKING_DIR=%cd%"
 
 IF EXIST "%JL_BAT_DIR%Juggling Lab.exe" (
