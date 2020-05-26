@@ -471,63 +471,6 @@ class Siteswap(object):
             string += ("(%s,%s)" % (str(node.left), str(node.right)))
         return string
 
-    # This and its dependencies should be in siteswapUI or siteswapHandler
-    # This isn't important for right now - doesn't make things harder by being here.
-    def printSiteswap(self): 
-        if self.isValid() and not self.isEmpty():
-            self.setIndices()
-            print("\nValid %d-prop siteswap" % self.getNumberProps())
-            print("Indices:       " + self.getIndexStr())
-            print("Siteswap:      " + str(self))
-            print("Rethrow line:  " + self.getRethrowStr())
-            print()
-
-        elif not self.isEmpty(): 
-            self.setIndices()
-            print("\nInvalid siteswap")
-            print("Indices:       " + self.getIndexStr())
-            print("Siteswap:      " + str(self))
-            print("Rethrow lines: " + self.getRethrowStr())
-            print("               " + self.getInvalidRethrowStr())
-            if self.rethrowsNotShown:
-                print(self.rethrowsNotShownStr)
-                print()
-            else:
-                print()
-        else:
-            print("\nSiteswap empty\n")
-
-    def getRethrowStr(self):
-        """Returns a string representation of the structure's rethrow values in MHN format"""
-        string = ""
-        i = 0
-        probe = self
-        for node in self:
-            string += ("(%s,%s)" % (node.left.rethrowStr(), node.right.rethrowStr()))
-        return string
-
-    def getInvalidRethrowStr(self):
-        """Returns a string representation of the structure's rethrow values in MHN format"""
-        string = ""
-        i = 0
-        probe = self
-        for node in self:
-            string += ("(%s,%s)" % (node.left.invalidRethrowStr(), node.right.invalidRethrowStr()))
-        return string
-
-    # self.index not needed.
-    def getIndexStr(self): 
-        string = ""
-        tempString = ""
-        width = 0
-        index = 0
-        for node in self:
-            tempString = ("%s,%s" % (str(node.left), str(node.right)))
-            width = len(tempString)
-            string += "({:^{}})".format(str(index), width)
-            index += 1
-        return string
-    
 
 
 

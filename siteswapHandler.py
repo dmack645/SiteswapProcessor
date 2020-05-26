@@ -154,15 +154,18 @@ class SiteswapHandler(object):
         return tempSiteswap
 
     def validate(self, siteswap):
+        self.siteswap = siteswap
         return self.validator.validate(siteswap)
 
     def shift(self, siteswap, direction):
         if siteswap.isEmpty() or len(siteswap) == 1:
             return
         elif direction == 'sl':
+            self.validate(siteswap.next)
             return siteswap.next
-            self.validator.validate(siteswap)
+
         else:
+            self.validate(siteswap.getTerm(len(siteswap) - 1))
             return siteswap.getTerm(len(siteswap) - 1)
         return
            
@@ -233,3 +236,242 @@ class SiteswapHandler(object):
 
     def drawDiagram(self, siteswap, dwell = 0):
         pass
+
+
+
+
+    def getSimpleString(self, siteswap = 0, mhn = False, asterisk = False):
+        """Returns a string representation of the structure in MHN format"""
+        if siteswap == 0:
+            siteswap = self.siteswap
+
+        if siteswap.isVanilla() and not mhn:
+            return self.getJlabString(siteswap)
+        else:
+            string = ""
+
+            index = 0
+            probe = siteswap
+            
+            if asterisk == True and siteswap.isSymmetric():
+                length = len(siteswap) // 2
+            else:
+                length = len(siteswap)
+
+            while index < length:
+                string += ("(%s,%s)" % (probe.left.getSimpleString(), probe.right.getSimpleString()))
+                probe = probe.next
+                index += 1
+            if asterisk == True and siteswap.isSymmetric():
+                string += "*"
+            return string
+
+    def getJlabString(self, siteswap = 0): 
+        """Returns a string representation of the structure in JLAB format"""
+        if siteswap == 0:
+            siteswap = self.siteswap
+
+        string = ""
+        index = 0
+
+
+        if siteswap.isVanilla():
+            hand = self.getVanillaFirstHand(siteswap)
+            firstIndex = self.getVanillaFirstIndex(siteswap)
+
+            # get first term hand 
+            while firstIndex != 0:
+                firstIndex -= 1
+                if hand == 'r':
+                    hand = 'l'
+                else:
+                    hand = 'r'
+
+            if siteswap.isSymmetric(): # SHOULDN'T NEED .SYMMETRIC. JUST ISSYMMETRIC IN HANDLER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                patternLength = len(siteswap) // 2
+            else:
+                patternLength = len(siteswap)
+
+            probe = siteswap
+            while index < patternLength:
+                if hand == 'r':
+                    if str(probe.right) == '-':
+                        value = '0'
+                    else:
+                        value = str(probe.right)
+                    string += value
+                    hand = 'l'
+                else:
+                    if str(probe.left) == '-':
+                        value = '0'
+                    else:
+                        value = str(probe.left)
+                    string += value
+                    hand = 'r'
+                index += 1
+                probe = probe.next
+            return string
+
+        elif siteswap.isSimpleSync():
+            probe = siteswap
+            # point to first term that isn't a null beat
+            while True:
+                if probe.left.throw != None or probe.right.throw != None:
+                    break
+                probe = probe.next
+
+            throwBeat = True
+            index = 0
+            if siteswap.isSymmetric():
+                length = len(siteswap) // 2
+            else:
+                length = len(siteswap)
+            while index < length:
+                if not throwBeat:
+                    probe = probe.next
+                    index += 1
+                    throwBeat = True
+                    continue
+                if probe.left.getSimpleString() == '-':
+                    left = '0'
+                else:
+                    left = probe.left.getSimpleString()
+                if probe.right.getSimpleString() == '-':
+                    right = '0'
+                else:
+                    right = probe.right.getSimpleString()
+                string += ("(%s,%s)" % (left, right))   
+                probe = probe.next
+                index += 1
+                throwBeat = False
+            if siteswap.isSymmetric():
+                string += "*"   
+            return string      
+
+        else:
+            probe = siteswap
+            index = 0
+
+            # point to first non-null beat
+            while True: 
+                if probe.left.throw != None or probe.right.throw != None:
+                    break
+                probe = probe.next
+
+            if siteswap.isSymmetric():
+                length = len(siteswap) // 2
+            else:
+                length = len(siteswap)
+
+            while index < length:
+                if len(probe.left) == 0 and len(probe.right) == 0:
+                    isNull = True
+                else:
+                    isNull = False
+
+                if len(probe.next.left) == 0 and len(probe.next.right) == 0:
+                    nextIsNull = True
+                else:
+                    nextIsNull = False
+
+                if probe.left.getSimpleString() == '-':
+                    left = '0'
+                else:
+                    left = probe.left.getSimpleString()
+                if probe.right.getSimpleString() == '-':
+                    right = '0'
+                else:
+                    right = probe.right.getSimpleString()
+                if nextIsNull:    
+                    string += ("(%s,%s)" % (left, right))
+                    index += 1
+                    probe = probe.next
+                else:
+                    string += ("(%s,%s)!" % (left, right))
+                index += 1
+                probe = probe.next
+            if siteswap.isSymmetric():
+                string += "*"
+
+
+            return string                
+
+    def getVanillaStateString(self, siteswap = 0):
+        if siteswap == 0:
+            siteswap = self.siteswap
+
+
+        if not siteswap.isVanilla():
+            return "attempted to get vanilla state string when not vanilla"
+        string = ""
+        index = 0
+        stateProbe = siteswap.state
+
+        while index < len(siteswap.state) and stateProbe != None:
+            if stateProbe.right == 0 and stateProbe.left == 0:
+                string += '0'
+            elif stateProbe.right != 0:
+                string += str(stateProbe.right)
+            else:
+                string += str(stateProbe.left)    
+            index += 1
+            stateProbe = stateProbe.next
+
+        return string
+
+    def printSiteswap(self): 
+        if self.siteswap.isValid() and not self.siteswap.isEmpty():
+            self.siteswap.setIndices()
+            print("\nValid %d-prop siteswap" % self.siteswap.getNumberProps())
+            print("Indices:       " + self.getIndexStr())
+            print("Siteswap:      " + str(self.siteswap))
+            print("Rethrow line:  " + self.getRethrowStr())
+            print()
+
+        elif not self.siteswap.isEmpty(): 
+            self.siteswap.setIndices()
+            print("\nInvalid siteswap")
+            print("Indices:       " + self.getIndexStr())
+            print("Siteswap:      " + str(self.siteswap))
+            print("Rethrow lines: " + self.getRethrowStr())
+            print("               " + self.getInvalidRethrowStr())
+            if self.siteswap.rethrowsNotShown:
+                print(self.siteswap.rethrowsNotShownStr)
+                print()
+            else:
+                print()
+        else:
+            print("\nSiteswap empty\n")
+
+    def getRethrowStr(self):
+        """Returns a string representation of the structure's rethrow values in MHN format"""
+        string = ""
+        i = 0
+        probe = self.siteswap
+        for node in self.siteswap:
+            string += ("(%s,%s)" % (node.left.rethrowStr(), node.right.rethrowStr()))
+        return string
+
+    def getInvalidRethrowStr(self):
+        """Returns a string representation of the structure's rethrow values in MHN format"""
+        string = ""
+        i = 0
+        probe = self.siteswap
+        for node in self.siteswap:
+            string += ("(%s,%s)" % (node.left.invalidRethrowStr(), node.right.invalidRethrowStr()))
+        return string
+
+    def getIndexStr(self): 
+        string = ""
+        tempString = ""
+        width = 0
+        index = 0
+
+        for node in self.siteswap:
+            tempString = ("%s,%s" % (str(node.left), str(node.right)))
+            width = len(tempString)
+            string += "({:^{}})".format(str(index), width)
+            index += 1
+
+        return string
+        
